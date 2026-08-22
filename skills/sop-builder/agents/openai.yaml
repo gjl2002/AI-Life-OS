@@ -1,0 +1,4 @@
+interface:
+  display_name: "SOP 构建"
+  short_description: "从真实经验中提取判断与步骤，形成可稳定复用的 SOP"
+  default_prompt: "使用 $sop-builder，把我已经实践过的方法整理成下次可稳定执行的 SOP。"

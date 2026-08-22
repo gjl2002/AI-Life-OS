@@ -1,0 +1,7 @@
+interface:
+  display_name: "人生定位教练"
+  short_description: "基于真实经历和现行人生系统，梳理人生方向、理想自我与长期愿景。"
+  default_prompt: "Use $life-positioning-coach to read my current cloud Notion life system and guide me through an evidence-based, revisable 人生定位地图."
+
+policy:
+  allow_implicit_invocation: true

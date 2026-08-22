@@ -1,0 +1,4 @@
+interface:
+  display_name: "信息源日报"
+  short_description: "只读取你主动关注的信息源，生成并默认写入 Notion 的可追溯日报"
+  default_prompt: "Use $information-source-daily-briefing to create today’s briefing from the sources I follow and write it to my Notion daily-report database."

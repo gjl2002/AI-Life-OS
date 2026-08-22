@@ -17,34 +17,33 @@
 
 ## 安装
 
-将本套件 `skills/` 目录中的 8 个文件夹复制到：
+本仓库只发布 Skill 文件，不包含任何 Notion 数据库、页面内容或个人配置。学员可以直接执行下面两条命令：
+
+```bash
+git clone https://github.com/gjl2002/AI---.git "$HOME/.ai-life-system-skill-suite"
+"$HOME/.ai-life-system-skill-suite/install.sh"
+```
+
+安装脚本会将 8 个 Skill 复制到当前用户的：
 
 ```text
 ~/.codex/skills/
 ```
 
-最终应能看到：
-
-```text
-~/.codex/skills/ai-life-system-init/SKILL.md
-~/.codex/skills/life-positioning-coach/SKILL.md
-~/.codex/skills/goal-planner/SKILL.md
-...
-```
-
-macOS 或 Linux 可在解压后的套件目录运行：
+如果已经下载仓库，也可以在仓库目录运行：
 
 ```bash
-mkdir -p ~/.codex/skills
-cp -R skills/. ~/.codex/skills/
+./install.sh
 ```
 
 复制完成后重新打开 Codex，或新建一个任务。
 
 ## 首次使用
 
+安装本身不需要 Notion。需要使用 Notion-backed 能力时：
+
 1. 在 Codex 中连接学员自己的 Notion。
-2. 确保学员复制的模板 Hub 已分享给当前 Notion 连接。
+2. 确保学员自己的模板 Hub 已分享给当前 Notion 连接。
 3. 运行 `$ai-life-system-init`，完成一次初始化。
 4. 初始化成功后，直接使用其余 7 个 Skill。
 

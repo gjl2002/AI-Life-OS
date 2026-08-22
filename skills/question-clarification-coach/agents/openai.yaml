@@ -1,0 +1,4 @@
+interface:
+  display_name: "问题澄清教练"
+  short_description: "帮助你把模糊、混杂或边界不清的困惑澄清为可继续处理的问题"
+  default_prompt: "请使用 $question-clarification-coach，帮我把这个模糊困惑澄清成一个清晰问题。"

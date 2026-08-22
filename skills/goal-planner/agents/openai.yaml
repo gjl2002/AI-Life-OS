@@ -1,0 +1,4 @@
+interface:
+  display_name: "目标教练"
+  short_description: "生成季度目标规划、项目拆解、习惯支撑与启动动作"
+  default_prompt: "Use $goal-planner to turn my next-three-month direction into a concise goal, projects, habits, and a launch report."

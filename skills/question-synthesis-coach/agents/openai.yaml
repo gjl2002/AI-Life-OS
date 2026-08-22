@@ -1,0 +1,7 @@
+interface:
+  display_name: "问题综合教练"
+  short_description: "围绕一个明确问题综合已有材料，说明它们共同支持什么、还有什么未知"
+  default_prompt: "使用 $question-synthesis-coach，围绕这个 Question 综合我当前指定或已关联的材料，说明它们目前共同支持什么。"
+
+policy:
+  allow_implicit_invocation: true

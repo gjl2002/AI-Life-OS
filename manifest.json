@@ -1,0 +1,18 @@
+{
+  "suite_name": "ai-life-system-skill-suite",
+  "suite_version": "1.1.0",
+  "published_at": "2026-08-22",
+  "entry_skill": "ai-life-system-init",
+  "install_target": "~/.codex/skills/",
+  "skills": [
+    "ai-life-system-init",
+    "life-positioning-coach",
+    "goal-planner",
+    "question-clarification-coach",
+    "question-synthesis-coach",
+    "stuck-point-insight-coach",
+    "information-source-daily-briefing",
+    "sop-builder"
+  ],
+  "private_config_included": false
+}

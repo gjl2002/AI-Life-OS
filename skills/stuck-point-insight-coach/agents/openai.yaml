@@ -1,0 +1,4 @@
+interface:
+  display_name: "卡点洞察教练"
+  short_description: "帮助你看清一个具体卡点，并找到此刻真正需要的回应或下一步"
+  default_prompt: "请使用 $stuck-point-insight-coach，帮我梳理一个当前正在卡住我的具体问题。"

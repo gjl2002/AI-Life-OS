@@ -82,7 +82,25 @@ class BuildConfigTest(unittest.TestCase):
                 candidate("99999999999999999999999999999999", "忽略数据库", "其他", selected=False),
             ],
             "dimension_pages": [
-                {"key": "life_dashboard", "title": "人生仪表盘", "page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "readable": True}
+                {
+                    "key": "commercial_system",
+                    "title": "商业系统",
+                    "page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "source": "hub_direct",
+                    "depth": 1,
+                    "readable": True,
+                },
+                {
+                    "key": "commercial_positioning",
+                    "title": "商业定位",
+                    "page_id": "cccccccccccccccccccccccccccccccc",
+                    "source": "system_child",
+                    "parent_page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "parent_key": "commercial_system",
+                    "depth": 2,
+                    "last_edited_time": "2026-08-22T11:00:00+08:00",
+                    "readable": True,
+                },
             ],
             "smoke_tests": [
                 {"data_source_id": "11111111111111111111111111111111", "status": "passed", "empty": True}
@@ -112,6 +130,12 @@ class BuildConfigTest(unittest.TestCase):
         self.assertEqual("option", semantic["todo"]["kind"])
         self.assertEqual("☑️ 待办", semantic["todo"]["primary_target"]["option"])
         self.assertEqual("multiple", semantic["focus"]["status"])
+        self.assertEqual("page", semantic["commercial_positioning"]["kind"])
+        self.assertEqual("商业定位", semantic["commercial_positioning"]["primary_target"]["title"])
+
+        self.assertIn("商业定位", outputs["initialization-report.md"])
+        page_lookup = index["lookup"]["page_titles"][build_config.normalize_text("商业定位")]
+        self.assertEqual("cccccccc-cccc-cccc-cccc-cccccccccccc", page_lookup[0]["page_id"])
 
     def test_absent_semantics_do_not_create_missing_or_degrade_health(self):
         raw = self.discovery()
@@ -133,6 +157,72 @@ class BuildConfigTest(unittest.TestCase):
         goal = json.loads(outputs["semantic-map.json"])["concepts"]["goal"]
         self.assertEqual("multiple", goal["status"])
         self.assertIsNone(goal["primary_target"])
+
+    def test_multi_data_source_container_preserves_source_titles_and_semantics(self):
+        raw = self.discovery()
+        raw["candidates"].append(candidate(
+            "88888888888888888888888888888888",
+            "AI 学习库",
+            "AI与系统工具",
+            data_sources=[
+                {
+                    "id": "88888888888888888888888888880001",
+                    "title": "去AI味库",
+                    "properties": [
+                        {"name": "句式名称", "type": "title"},
+                        {"name": "禁用等级", "type": "select", "options": ["必删", "慎用", "可保留"]},
+                    ],
+                },
+                {
+                    "id": "88888888888888888888888888880002",
+                    "title": "文风语料库",
+                    "properties": [{"name": "文章标题", "type": "title"}],
+                },
+            ],
+        ))
+        outputs = self.outputs(raw)
+        index = json.loads(outputs["notion-index.json"])
+        source_titles = {
+            source["title"]: source["data_source_id"]
+            for source in index["sources"]
+            if source["database_title"] == "AI 学习库"
+        }
+        self.assertEqual({"去AI味库", "文风语料库"}, set(source_titles))
+
+        semantic = json.loads(outputs["semantic-map.json"])["concepts"]
+        self.assertEqual("去AI味库", semantic["ai_flavor_library"]["primary_target"]["title"])
+        self.assertEqual("文风语料库", semantic["style_corpus"]["primary_target"]["title"])
+
+    def test_duplicate_exact_pages_are_multiple_and_page_ids_are_deduplicated(self):
+        raw = self.discovery()
+        raw["dimension_pages"].append({
+            "key": "commercial_positioning_copy",
+            "title": "商业定位",
+            "page_id": "dddddddddddddddddddddddddddddddd",
+            "source": "system_child",
+            "parent_page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "parent_key": "commercial_system",
+            "depth": 2,
+            "readable": True,
+        })
+        raw["dimension_pages"].append(dict(raw["dimension_pages"][1]))
+        outputs = self.outputs(raw)
+        concept = json.loads(outputs["semantic-map.json"])["concepts"]["commercial_positioning"]
+        pages = json.loads(outputs["dimension-pages.json"])["pages"]
+        self.assertEqual("multiple", concept["status"])
+        self.assertEqual(2, len([page for page in pages if page["title"] == "商业定位"]))
+
+    def test_rejects_page_discovery_beyond_bounded_depth(self):
+        raw = self.discovery()
+        raw["dimension_pages"].append({
+            "key": "too_deep",
+            "title": "不应继续扫描的页面",
+            "page_id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "depth": 3,
+            "readable": True,
+        })
+        with self.assertRaises(build_config.ConfigError):
+            build_config.normalize_discovery(raw)
 
     def test_transaction_and_cross_file_validation(self):
         outputs = self.outputs()

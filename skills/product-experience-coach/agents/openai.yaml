@@ -1,0 +1,6 @@
+interface:
+  display_name: "产品体验教练"
+  short_description: "基于真实用户证据，设计或诊断产品旅程与服务体验"
+  default_prompt: "Use $product-experience-coach to choose the right experience mode and design or diagnose this product using my current cloud Notion evidence."
+policy:
+  allow_implicit_invocation: true

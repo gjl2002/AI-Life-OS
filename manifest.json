@@ -1,10 +1,10 @@
 {
-  "suite_name": "ai-life-system-skill-suite",
-  "suite_version": "1.1.0",
-  "published_at": "2026-08-22",
+  "suite_name": "ai-life-os-skill-suite",
+  "suite_version": "2.0.0",
+  "published_at": "2026-08-27",
   "entry_skill": "ai-life-system-init",
   "install_target": "~/.codex/skills/",
-  "skills": [
+  "life_system_skills": [
     "ai-life-system-init",
     "life-positioning-coach",
     "goal-planner",
@@ -14,5 +14,45 @@
     "information-source-daily-briefing",
     "sop-builder"
   ],
-  "private_config_included": false
+  "commercial_system_skills": [
+    "commercial-positioning-coach",
+    "user-avatar-coach",
+    "product-opportunity-coach",
+    "product-architecture-coach",
+    "product-experience-coach",
+    "course-handout-writing-coach",
+    "product-detail-page-design",
+    "wechat-article-writing-coach",
+    "wechat-moments-writing-coach",
+    "xiaohongshu-native-note-coach"
+  ],
+  "shared_dependencies": [
+    "humanizer-zh"
+  ],
+  "skills": [
+    "ai-life-system-init",
+    "life-positioning-coach",
+    "goal-planner",
+    "question-clarification-coach",
+    "question-synthesis-coach",
+    "stuck-point-insight-coach",
+    "information-source-daily-briefing",
+    "sop-builder",
+    "commercial-positioning-coach",
+    "user-avatar-coach",
+    "product-opportunity-coach",
+    "product-architecture-coach",
+    "product-experience-coach",
+    "course-handout-writing-coach",
+    "product-detail-page-design",
+    "wechat-article-writing-coach",
+    "wechat-moments-writing-coach",
+    "xiaohongshu-native-note-coach",
+    "humanizer-zh"
+  ],
+  "private_config_included": false,
+  "notion_data_included": false,
+  "deduplication": {
+    "policy": "保留已接入 Runtime 的较新成长系统版本；ai-life-system-init 只保留一份；商业系统 Skill 按目录名合并。"
+  }
 }

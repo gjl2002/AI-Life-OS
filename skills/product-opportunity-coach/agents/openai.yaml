@@ -1,0 +1,4 @@
+interface:
+  display_name: "产品机会教练"
+  short_description: "基于云端证据判断产品机会并设计真实验证"
+  default_prompt: "Use $product-opportunity-coach to judge whether this product idea is worth pursuing, using my cloud Notion evidence and the smallest real-world validation that can change the decision."

@@ -13,7 +13,7 @@ from typing import Any, Optional
 from build_config import canonical_notion_id, normalize_text
 
 
-RUNTIME_VERSION = "1.1.0"
+RUNTIME_VERSION = "1.2.0"
 
 
 class RuntimeConfigError(ValueError):
@@ -49,15 +49,18 @@ def load_runtime(config_dir: Path) -> dict[str, Any]:
     profile = load_json(root / "profile.json")
     index = load_json(referenced_file(root, profile, "source_index_file", "notion-index.json"))
     semantic = load_json(referenced_file(root, profile, "semantic_map_file", "semantic-map.json"))
+    pages = load_json(referenced_file(root, profile, "dimension_pages_file", "dimension-pages.json"))
 
-    versions = {str(item.get("schema_version") or "") for item in (profile, index, semantic)}
+    versions = {str(item.get("schema_version") or "") for item in (profile, index, semantic, pages)}
     if len(versions) != 1 or "" in versions:
         raise RuntimeConfigError("profile、事实索引与语义映射的 schema_version 不一致")
     if not isinstance(index.get("sources"), list) or not isinstance(index.get("lookup"), dict):
         raise RuntimeConfigError("notion-index.json 缺少 sources 或 lookup")
     if not isinstance(semantic.get("concepts"), dict):
         raise RuntimeConfigError("semantic-map.json 缺少 concepts")
-    return {"config_dir": root, "profile": profile, "index": index, "semantic": semantic}
+    if not isinstance(pages.get("pages"), list):
+        raise RuntimeConfigError("dimension-pages.json 缺少 pages")
+    return {"config_dir": root, "profile": profile, "index": index, "semantic": semantic, "pages": pages}
 
 
 def runtime_status(bundle: dict[str, Any]) -> dict[str, Any]:
@@ -78,6 +81,7 @@ def runtime_status(bundle: dict[str, Any]) -> dict[str, Any]:
         "initialized_at": profile.get("initialized_at", ""),
         "index_generated_at": index.get("generated_at", ""),
         "source_count": len(index["sources"]),
+        "page_count": len(bundle["pages"]["pages"]),
         "semantic_count": len(semantic["concepts"]),
     }
 
@@ -105,6 +109,21 @@ def resolution(kind: str, value: str, targets: list[Any]) -> dict[str, Any]:
     }
 
 
+def runtime_page_reference(page: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "kind": "page",
+        "key": page.get("key"),
+        "title": page.get("title"),
+        "page_id": page.get("page_id"),
+        "url": page.get("url", ""),
+        "last_edited_time": page.get("last_edited_time", ""),
+        "parent_page_id": page.get("parent_page_id", ""),
+        "parent_key": page.get("parent_key", ""),
+        "depth": page.get("depth", 1),
+        "read_ready": bool(page.get("readable", False)),
+    }
+
+
 def resolve(bundle: dict[str, Any], kind: str, value: str) -> dict[str, Any]:
     if kind == "concept":
         rule = bundle["semantic"]["concepts"].get(value)
@@ -120,6 +139,13 @@ def resolve(bundle: dict[str, Any], kind: str, value: str) -> dict[str, Any]:
         source_targets = lookup.get("source_titles", {}).get(key, [])
         database_targets = lookup.get("database_titles", {}).get(key, [])
         return resolution(kind, value, list(source_targets) + list(database_targets))
+    if kind == "page":
+        page_targets = [
+            runtime_page_reference(page)
+            for page in bundle["pages"]["pages"]
+            if normalize_text(page.get("title")) == key
+        ]
+        return resolution(kind, value, page_targets)
     lookup_name = "property_names" if kind == "property" else "option_names"
     return resolution(kind, value, list(lookup.get(lookup_name, {}).get(key, [])))
 
@@ -129,6 +155,14 @@ def find_source(index: dict[str, Any], data_source_id: str) -> Optional[dict[str
     for source in index["sources"]:
         if canonical_notion_id(source.get("data_source_id")) == wanted:
             return source
+    return None
+
+
+def find_page(pages: dict[str, Any], page_id: str) -> Optional[dict[str, Any]]:
+    wanted = canonical_notion_id(page_id)
+    for page in pages["pages"]:
+        if canonical_notion_id(page.get("page_id")) == wanted:
+            return page
     return None
 
 
@@ -241,6 +275,45 @@ def check_write(
     return base
 
 
+def check_page_write(bundle: dict[str, Any], page_id: str) -> dict[str, Any]:
+    profile = bundle["profile"]
+    page = find_page(bundle["pages"], page_id)
+    errors: list[dict[str, Any]] = []
+    warnings: list[dict[str, Any]] = []
+    base: dict[str, Any] = {
+        "operation": "update_page_body",
+        "page_id": canonical_notion_id(page_id),
+        "requires_user_authorization": True,
+        "requires_live_page_check": True,
+        "errors": errors,
+        "warnings": warnings,
+    }
+    if page is None:
+        errors.append(issue("page_not_found", "普通页面索引中没有这个页面"))
+        return {**base, "page_write_ready": False, "target": None}
+
+    base["target"] = {
+        "kind": "page",
+        "key": page.get("key"),
+        "title": page.get("title"),
+        "page_id": page.get("page_id"),
+        "url": page.get("url"),
+        "last_edited_time": page.get("last_edited_time"),
+        "parent_page_id": page.get("parent_page_id"),
+        "parent_key": page.get("parent_key"),
+    }
+    health = profile.get("health") if isinstance(profile.get("health"), dict) else {}
+    if health.get("status") == "blocked":
+        errors.append(issue("runtime_blocked", "本地配置健康状态为 blocked，请先重新绑定"))
+    if not page.get("readable"):
+        errors.append(issue("page_unreadable", "目标普通页面当前不可读取"))
+    if not page.get("last_edited_time"):
+        warnings.append(issue("page_edit_time_missing", "索引没有页面最后编辑时间，写入前必须重新读取并核对页面身份"))
+
+    base["page_write_ready"] = not errors
+    return base
+
+
 def print_json(value: dict[str, Any]) -> None:
     print(json.dumps(value, ensure_ascii=False, indent=2))
 
@@ -251,18 +324,22 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("status", help="检查本地运行时状态")
 
-    resolve_parser = subparsers.add_parser("resolve", help="解析语义、数据源、字段或选项")
+    resolve_parser = subparsers.add_parser("resolve", help="解析语义、普通页面、数据源、字段或选项")
     resolve_group = resolve_parser.add_mutually_exclusive_group(required=True)
     resolve_group.add_argument("--concept")
     resolve_group.add_argument("--source")
     resolve_group.add_argument("--property")
     resolve_group.add_argument("--option")
+    resolve_group.add_argument("--page")
 
     write_parser = subparsers.add_parser("check-write", help="对一次创建或更新动作做本地写入前校验")
     write_parser.add_argument("--data-source-id", required=True)
     write_parser.add_argument("--operation", choices=("create", "update"), default="create")
     write_parser.add_argument("--field", action="append", default=[])
     write_parser.add_argument("--option", action="append", default=[])
+
+    page_write_parser = subparsers.add_parser("check-page-write", help="对一次普通页面正文更新做本地身份预检")
+    page_write_parser.add_argument("--page-id", required=True)
     return parser.parse_args(argv)
 
 
@@ -274,10 +351,14 @@ def main(argv: Optional[list[str]] = None) -> int:
             print_json(runtime_status(bundle))
             return 0
         if args.command == "resolve":
-            kind = next(kind for kind in ("concept", "source", "property", "option") if getattr(args, kind) is not None)
+            kind = next(kind for kind in ("concept", "source", "property", "option", "page") if getattr(args, kind) is not None)
             result = resolve(bundle, kind, getattr(args, kind))
             print_json(result)
             return 3 if result["status"] == "not_found" else 0
+        if args.command == "check-page-write":
+            result = check_page_write(bundle, args.page_id)
+            print_json(result)
+            return 0 if result["page_write_ready"] else 4
         result = check_write(bundle, args.data_source_id, args.field, args.option, args.operation)
         print_json(result)
         return 0 if result["write_ready"] else 4

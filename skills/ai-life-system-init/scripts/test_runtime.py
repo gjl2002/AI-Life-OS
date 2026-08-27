@@ -49,7 +49,27 @@ class RuntimeTest(unittest.TestCase):
                     ],
                 },
             ],
-            "dimension_pages": [],
+            "dimension_pages": [
+                {
+                    "key": "commercial_system",
+                    "title": "商业系统",
+                    "page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "source": "hub_direct",
+                    "depth": 1,
+                    "readable": True,
+                },
+                {
+                    "key": "commercial_positioning",
+                    "title": "商业定位",
+                    "page_id": "cccccccccccccccccccccccccccccccc",
+                    "source": "system_child",
+                    "parent_page_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "parent_key": "commercial_system",
+                    "depth": 2,
+                    "last_edited_time": "2026-08-22T11:00:00+08:00",
+                    "readable": True,
+                },
+            ],
             "smoke_tests": [],
         }
         semantics = build_config.load_json(SCRIPT_DIR.parent / "references" / "semantic-aliases.json")
@@ -61,6 +81,7 @@ class RuntimeTest(unittest.TestCase):
         status = runtime.runtime_status(self.bundle)
         self.assertEqual("ready", status["runtime_status"])
         self.assertEqual(2, status["source_count"])
+        self.assertEqual(2, status["page_count"])
         self.assertGreater(status["semantic_count"], 0)
 
     def test_resolve_concept_source_and_multiple_property(self):
@@ -78,6 +99,14 @@ class RuntimeTest(unittest.TestCase):
 
         missing = runtime.resolve(self.bundle, "source", "不存在")
         self.assertEqual("not_found", missing["status"])
+
+        positioning = runtime.resolve(self.bundle, "concept", "commercial_positioning")
+        self.assertEqual("ready", positioning["status"])
+        self.assertEqual("page", positioning["primary_target"]["kind"])
+
+        page = runtime.resolve(self.bundle, "page", "商业定位")
+        self.assertEqual("ready", page["status"])
+        self.assertEqual("cccccccc-cccc-cccc-cccc-cccccccccccc", page["primary_target"]["page_id"])
 
     def test_check_write_accepts_real_fields_and_option(self):
         result = runtime.check_write(
@@ -112,6 +141,17 @@ class RuntimeTest(unittest.TestCase):
         )
         self.assertFalse(result["write_ready"])
         self.assertIn("title_field_required", {item["code"] for item in result["errors"]})
+
+    def test_check_page_write_validates_bound_page_identity(self):
+        result = runtime.check_page_write(self.bundle, "cccccccccccccccccccccccccccccccc")
+        self.assertTrue(result["page_write_ready"])
+        self.assertTrue(result["requires_user_authorization"])
+        self.assertTrue(result["requires_live_page_check"])
+        self.assertEqual("商业定位", result["target"]["title"])
+
+        missing = runtime.check_page_write(self.bundle, "dddddddddddddddddddddddddddddddd")
+        self.assertFalse(missing["page_write_ready"])
+        self.assertIn("page_not_found", {item["code"] for item in missing["errors"]})
 
 
 if __name__ == "__main__":

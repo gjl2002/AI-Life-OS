@@ -1,8 +1,8 @@
 # AI 人生系统底座 Skill
 
-版本：`1.1.0`
+版本：`1.2.0`
 
-一个 Skill 同时完成两件事：首次读取学员自己的 Notion 模板并建立本地动态索引；为目标、任务、复盘等具体 Skill 提供统一的目标解析和写入前校验。不需要再安装单独的 `notion-life-system`。
+一个 Skill 同时完成两件事：首次读取学员自己的 Notion 模板，有限发现三个系统入口的直接子页面并建立本地动态索引；为目标、任务、复盘、商业定位等具体 Skill 提供统一的目标解析和写入前校验。不需要再安装单独的 `notion-life-system`。
 
 发布包不会包含任何学员的 Notion 数据、数据库 ID 或个人记录。
 
@@ -41,9 +41,10 @@ $ai-life-system-init
 ```text
 python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py status
 python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept task
+python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept commercial_positioning
 ```
 
-写入前再调用 `check-write` 校验真实 Data Source、字段和选项。Runtime 只做结构解析与本地预检，不会替业务 Skill 写入 Notion，也不代表用户已经授权。
+数据库写入前调用 `check-write` 校验真实 Data Source、字段和选项；普通页面正文更新前调用 `check-page-write` 校验页面身份。Runtime 只做结构解析与本地预检，不会替业务 Skill 写入 Notion，也不代表用户已经授权。
 
 学员只需运行一次 `$ai-life-system-init`。以后模板发生变化时重新运行，所有接入它的具体 Skill 会读取新索引，无需逐个重新配置。
 
@@ -55,13 +56,14 @@ python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept
 ~/.ai-life-system/
 ```
 
-其中 `notion-index.json` 是事实索引，包含数据库、字段、选项、Relation 和查找表；`semantic-map.json` 只记录实际找到的概念。后续 Skill 应优先调用 `scripts/runtime.py`，不要重复实现解析逻辑。
+其中 `notion-index.json` 是事实索引，包含数据库、字段、选项、Relation 和查找表；`dimension-pages.json` 保存系统入口与核心普通页面的身份，不保存正文；`semantic-map.json` 只记录实际找到的概念。后续 Skill 应优先调用 `scripts/runtime.py`，不要重复实现解析逻辑。
 
 注意：`~/.ai-life-system/` 属于学员个人本地状态，不要把它上传 GitHub、放进课程 ZIP 或分享给其他学员。
 
 ## 设计特点
 
 - 以学员当前 Notion 页面为事实来源，不要求所有人使用完全相同的数据库名称。
+- 只展开成长、商业、生活系统入口的直接子页面，不递归扫描整个工作区。
 - “待办”可以是字段选项，“专注”可以出现在多个数据库字段中，不会被误判成独立数据库。
 - 初始化与业务动作分离：初始化只建立索引；Runtime 负责结构解析和预检；具体 Skill 负责业务逻辑与获得授权后的实际动作。
 - 如果模板发生变化，可以重新运行 Skill；旧本地配置会自动备份。

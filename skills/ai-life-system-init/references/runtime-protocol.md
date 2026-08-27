@@ -28,6 +28,8 @@ python3 scripts/runtime.py status
 
 ```bash
 python3 scripts/runtime.py resolve --concept task
+python3 scripts/runtime.py resolve --concept commercial_positioning
+python3 scripts/runtime.py resolve --page 商业定位
 python3 scripts/runtime.py resolve --source 任务
 python3 scripts/runtime.py resolve --property 专注
 python3 scripts/runtime.py resolve --option 待办
@@ -40,7 +42,9 @@ python3 scripts/runtime.py resolve --option 待办
 - `status: not_found`：当前索引没有精确匹配，退出码为 `3`；
 - `targets`：供业务上下文按 Data Source、字段类型和动作对象继续过滤。
 
-名称查询使用 NFKC、转小写和移除常见分隔符后的精确匹配，不做模糊标题猜测。优先使用稳定 concept key；语义不存在时，再查询 source、property 或 option。
+名称查询使用 NFKC、转小写和移除常见分隔符后的精确匹配，不做模糊标题猜测。优先使用稳定 concept key；语义不存在时，再查询 page、source、property 或 option。
+
+page 目标来自初始化时有限发现并写入 `dimension-pages.json` 的普通页面。Runtime 返回页面身份，不返回页面正文；具体 Skill 必须再从 Notion 读取实时内容。
 
 ## check-write
 
@@ -72,6 +76,19 @@ python3 scripts/runtime.py check-write \
 
 Runtime 预检永远不授予写权限。
 
+## check-page-write
+
+```bash
+python3 scripts/runtime.py check-page-write --page-id <resolve 返回的真实 page ID>
+```
+
+普通页面预检会阻止不存在或不可读的页面，并返回索引中的标题、父页面和最后编辑时间。只有 `page_write_ready: true` 才能继续，但具体 Skill 仍须：
+
+1. 确认用户明确授权本次正文更新；
+2. 从 Notion 实时重新读取页面并核对 page ID；
+3. 只更新业务 Skill 声明的章节或区块，不覆盖无关内容；
+4. 写入后回读核对。
+
 ## 具体 Skill 接入片段
 
 具体 Skill 可以加入以下依赖约定，并按自己的业务补充 concept key：
@@ -79,7 +96,7 @@ Runtime 预检永远不授予写权限。
 ```text
 本 Skill 使用 $ai-life-system-init 作为 AI 人生系统 Notion 运行时底座。
 执行前先调用其 scripts/runtime.py status；再用 resolve 定位真实目标。
-任何写入前把目标 Data Source、本次字段和选项传给 check-write。
+数据库写入前把目标 Data Source、本次字段和选项传给 check-write；普通页面正文更新前调用 check-page-write。
 multiple 不静默取第一个，needs_init 时引导用户运行 $ai-life-system-init。
 ```
 

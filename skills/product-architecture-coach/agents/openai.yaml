@@ -1,0 +1,4 @@
+interface:
+  display_name: "产品架构教练"
+  short_description: "基于云端产品与用户证据，设计可交付、可验证的产品架构"
+  default_prompt: "Use $product-architecture-coach to turn my product direction and cloud Notion evidence into a reviewable MVP architecture blueprint."

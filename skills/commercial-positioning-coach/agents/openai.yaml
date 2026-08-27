@@ -1,0 +1,4 @@
+interface:
+  display_name: "商业定位教练"
+  short_description: "读取云端证据，校准优先客户、问题、价值机制与市场选择"
+  default_prompt: "Use $commercial-positioning-coach to resolve my live Notion positioning through the AI Life System Runtime and guide the next evidence-backed commercial positioning decision."

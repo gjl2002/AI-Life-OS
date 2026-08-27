@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-SCHEMA_VERSION = "0.3"
-ACCEPTED_DISCOVERY_VERSIONS = {"0.2", SCHEMA_VERSION}
+SCHEMA_VERSION = "0.4"
+ACCEPTED_DISCOVERY_VERSIONS = {"0.2", "0.3", SCHEMA_VERSION}
 OUTPUT_FILES = (
     "profile.json",
     "discovery.json",
@@ -206,6 +206,57 @@ def merge_candidate(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
     return merged
 
 
+def normalize_dimension_page(raw: dict[str, Any]) -> dict[str, Any]:
+    page_id = canonical_notion_id(raw.get("page_id") or raw.get("id"))
+    if not page_id:
+        raise ConfigError("非数据库页面缺少 page_id")
+    depth_raw = raw.get("depth", 1)
+    try:
+        depth = int(depth_raw)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(f"非数据库页面 depth 无效：{depth_raw}") from exc
+    if depth < 0 or depth > 2:
+        raise ConfigError(f"非数据库页面 depth 必须在 0 到 2 之间：{depth}")
+    title = str(raw.get("title") or "未命名页面")
+    return {
+        "key": str(raw.get("key") or normalize_text(title) or "page"),
+        "title": title,
+        "page_id": page_id,
+        "url": str(raw.get("url") or ""),
+        "last_edited_time": str(raw.get("last_edited_time") or ""),
+        "source": str(raw.get("source") or "hub_direct"),
+        "parent_page_id": canonical_notion_id(raw.get("parent_page_id")),
+        "parent_key": str(raw.get("parent_key") or ""),
+        "depth": depth,
+        "detection_reason": str(raw.get("detection_reason") or ""),
+        "readable": bool(raw.get("readable", True)),
+        "user_override": copy.deepcopy(raw.get("user_override", {})) if isinstance(raw.get("user_override"), dict) else {},
+    }
+
+
+def merge_dimension_page(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+    merged = copy.deepcopy(existing)
+    existing_depth = int(existing.get("depth", 2))
+    incoming_depth = int(incoming.get("depth", 2))
+    if incoming_depth < existing_depth:
+        for key in ("key", "parent_page_id", "parent_key", "detection_reason"):
+            if incoming.get(key):
+                merged[key] = incoming[key]
+    for key in ("title", "url", "last_edited_time", "parent_page_id", "parent_key", "detection_reason"):
+        if not merged.get(key) and incoming.get(key):
+            merged[key] = incoming[key]
+    merged["depth"] = min(existing_depth, incoming_depth)
+    merged["readable"] = bool(existing.get("readable") or incoming.get("readable"))
+    if incoming.get("user_override"):
+        merged["user_override"] = incoming["user_override"]
+    sources = []
+    for value in (existing.get("source"), incoming.get("source")):
+        if value and value not in sources:
+            sources.append(value)
+    merged["source"] = sources[0] if len(sources) == 1 else "+".join(sources)
+    return merged
+
+
 def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
     input_version = str(raw.get("schema_version") or "")
     if input_version and input_version not in ACCEPTED_DISCOVERY_VERSIONS:
@@ -229,18 +280,13 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
         current = by_id.get(candidate["database_id"])
         by_id[candidate["database_id"]] = merge_candidate(current, candidate) if current else candidate
 
-    pages = []
+    pages_by_id: dict[str, dict[str, Any]] = {}
     for page in raw.get("dimension_pages", []):
         if not isinstance(page, dict) or not page.get("page_id"):
             continue
-        pages.append({
-            "key": str(page.get("key") or normalize_text(page.get("title")) or "page"),
-            "title": str(page.get("title") or "未命名页面"),
-            "page_id": canonical_notion_id(page.get("page_id")),
-            "url": str(page.get("url") or ""),
-            "source": str(page.get("source") or "hub_direct"),
-            "readable": bool(page.get("readable", True)),
-        })
+        normalized_page = normalize_dimension_page(page)
+        current = pages_by_id.get(normalized_page["page_id"])
+        pages_by_id[normalized_page["page_id"]] = merge_dimension_page(current, normalized_page) if current else normalized_page
 
     smoke_tests = []
     for test in raw.get("smoke_tests", []):
@@ -270,7 +316,7 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
             "readable": bool(hub.get("readable")),
         },
         "candidates": sorted(by_id.values(), key=lambda item: (normalize_text(item["source_section"]), normalize_text(item["title"]), item["database_id"])),
-        "dimension_pages": sorted(pages, key=lambda item: (item["key"], item["page_id"])),
+        "dimension_pages": sorted(pages_by_id.values(), key=lambda item: (item["depth"], normalize_text(item["title"]), item["page_id"])),
         "smoke_tests": smoke_tests,
     }
 
@@ -292,7 +338,7 @@ def normalize_semantics(semantics: dict[str, Any]) -> list[dict[str, Any]]:
             raise ConfigError(f"语义概念 key 重复：{key}")
         seen.add(key)
         kind = str(raw.get("kind") or "source")
-        if kind not in {"source", "property", "option"}:
+        if kind not in {"source", "property", "option", "page"}:
             raise ConfigError(f"语义概念 {key} kind 无效：{kind}")
         aliases = [str(value) for value in raw.get("aliases", []) if normalize_text(value)]
         if not aliases:
@@ -405,11 +451,27 @@ def add_lookup(lookup: dict[str, list[Any]], name: Any, value: Any) -> None:
         lookup[key].append(value)
 
 
-def build_lookup(sources: list[dict[str, Any]]) -> dict[str, Any]:
+def page_reference(page: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "kind": "page",
+        "key": page["key"],
+        "title": page["title"],
+        "page_id": page["page_id"],
+        "url": page["url"],
+        "last_edited_time": page["last_edited_time"],
+        "parent_page_id": page["parent_page_id"],
+        "parent_key": page["parent_key"],
+        "depth": page["depth"],
+        "read_ready": page["readable"],
+    }
+
+
+def build_lookup(sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> dict[str, Any]:
     source_titles: dict[str, list[Any]] = {}
     database_titles: dict[str, list[Any]] = {}
     property_names: dict[str, list[Any]] = {}
     option_names_index: dict[str, list[Any]] = {}
+    page_titles: dict[str, list[Any]] = {}
     for source in sources:
         source_ref = {
             "database_id": source["database_id"],
@@ -423,12 +485,15 @@ def build_lookup(sources: list[dict[str, Any]]) -> dict[str, Any]:
             add_lookup(property_names, prop["name"], field_ref)
             for option in prop.get("options", []):
                 add_lookup(option_names_index, option, {**field_ref, "option": option})
+    for page in pages:
+        add_lookup(page_titles, page["title"], page_reference(page))
     return {
         "normalization": "NFKC + lowercase + remove separators",
         "source_titles": source_titles,
         "database_titles": database_titles,
         "property_names": property_names,
         "option_names": option_names_index,
+        "page_titles": page_titles,
     }
 
 
@@ -439,10 +504,23 @@ def source_matches_context(source: dict[str, Any], aliases: list[str]) -> bool:
     return any(normalize_text(alias) in names for alias in aliases)
 
 
-def semantic_targets(concept: dict[str, Any], sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def semantic_targets(concept: dict[str, Any], sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     aliases = {normalize_text(value) for value in concept["aliases"]}
     property_aliases = {normalize_text(value) for value in concept["property_aliases"]}
     targets = []
+    if concept["kind"] == "page":
+        for page in pages:
+            override = page.get("user_override") if isinstance(page.get("user_override"), dict) else {}
+            explicit = str(override.get("capability") or "") == concept["key"]
+            exact = normalize_text(page["title"]) in aliases
+            if explicit or exact:
+                targets.append({
+                    **page_reference(page),
+                    "confidence": 1.0 if explicit else 0.99,
+                    "evidence": "user_override" if explicit else "exact_page_title",
+                })
+        return sorted(targets, key=lambda item: (item["depth"], normalize_text(item["title"]), item["page_id"]))
+
     for source in sources:
         source_ref = {
             "database_id": source["database_id"],
@@ -493,10 +571,10 @@ def semantic_targets(concept: dict[str, Any], sources: list[dict[str, Any]]) -> 
     return sorted(targets, key=lambda item: (normalize_text(item["title"]), item["data_source_id"], item.get("property", ""), item.get("option", "")))
 
 
-def build_semantic_map(concepts: list[dict[str, Any]], sources: list[dict[str, Any]]) -> dict[str, Any]:
+def build_semantic_map(concepts: list[dict[str, Any]], sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> dict[str, Any]:
     mapped = {}
     for concept in concepts:
-        targets = semantic_targets(concept, sources)
+        targets = semantic_targets(concept, sources, pages)
         if not targets:
             continue
         mapped[concept["key"]] = {
@@ -509,7 +587,7 @@ def build_semantic_map(concepts: list[dict[str, Any]], sources: list[dict[str, A
     return mapped
 
 
-def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]]) -> tuple[str, list[str]]:
+def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> tuple[str, list[str]]:
     warnings = []
     if not discovery["hub"]["readable"]:
         return "blocked", ["Hub 无法读取"]
@@ -526,7 +604,10 @@ def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]]) -> 
     failed_smoke = [test for test in discovery["smoke_tests"] if test["status"] == "failed"]
     if failed_smoke:
         warnings.append(f"{len(failed_smoke)} 个只读冒烟测试失败")
-    return ("needs_attention" if failed_sources or failed_smoke else "ready"), warnings
+    unreadable_pages = [page for page in pages if not page["readable"]]
+    if unreadable_pages:
+        warnings.append(f"{len(unreadable_pages)} 个普通页面不可读取")
+    return ("needs_attention" if failed_sources or failed_smoke or unreadable_pages else "ready"), warnings
 
 
 def render_report(
@@ -534,6 +615,7 @@ def render_report(
     semantics: dict[str, Any],
     semantic_map: dict[str, Any],
     sources: list[dict[str, Any]],
+    pages: list[dict[str, Any]],
     health: str,
     warnings: list[str],
     generated_at: str,
@@ -550,6 +632,7 @@ def render_report(
         f"- 整体状态：`{health}`",
         f"- 候选数据库：`{len(discovery['candidates'])}`，已选择：`{selected_count}`",
         f"- Data Source：`{len(sources)}`，可读取：`{readable_count}`",
+        f"- 普通页面：`{len(pages)}`，可读取：`{sum(1 for page in pages if page['readable'])}`",
         "",
         "## 实际数据源索引",
         "",
@@ -606,10 +689,11 @@ def build_outputs(discovery: dict[str, Any], semantics: dict[str, Any]) -> dict[
     generated_at = utc_now()
     concepts = normalize_semantics(semantics)
     sources = schema_sources(discovery, generated_at)
+    pages = discovery["dimension_pages"]
     enrich_field_access(sources)
-    lookup = build_lookup(sources)
-    mapped = build_semantic_map(concepts, sources)
-    health, warnings = overall_health(discovery, sources)
+    lookup = build_lookup(sources, pages)
+    mapped = build_semantic_map(concepts, sources, pages)
+    health, warnings = overall_health(discovery, sources, pages)
 
     profile_concepts = {
         key: {
@@ -671,7 +755,7 @@ def build_outputs(discovery: dict[str, Any], semantics: dict[str, Any]) -> dict[
         "capabilities": mapped,
     }
     dimension_pages = {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "pages": discovery["dimension_pages"]}
-    report = render_report(discovery, semantics, mapped, sources, health, warnings, generated_at)
+    report = render_report(discovery, semantics, mapped, sources, pages, health, warnings, generated_at)
 
     json_values = {
         "profile.json": profile,

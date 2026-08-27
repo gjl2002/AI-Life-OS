@@ -1,0 +1,7 @@
+interface:
+  display_name: "用户画像教练"
+  short_description: "从真实用户证据提炼画像、分群与购买逻辑"
+  default_prompt: "Use $user-avatar-coach to analyze my real user materials, verify them against my cloud Notion context, and produce an evidence-based user avatar or avatar hypothesis."
+
+policy:
+  allow_implicit_invocation: true

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 
-SCHEMA_VERSION = "0.3"
+SCHEMA_VERSION = "0.4"
 REQUIRED_JSON = (
     "profile.json",
     "discovery.json",
@@ -86,9 +86,35 @@ def validate(config_dir: Path) -> list[str]:
         errors.append("notion-index.json 存在重复 data_source_id")
 
     valid_source_ids = set(source_ids)
+    pages = loaded["dimension-pages.json"].get("pages")
+    valid_page_ids: set[str] = set()
+    if not isinstance(pages, list):
+        errors.append("dimension-pages.json pages 必须是数组")
+        pages = []
+    for page in pages:
+        if not isinstance(page, dict):
+            errors.append("dimension-pages.json 包含非对象 page")
+            continue
+        page_id = str(page.get("page_id") or "")
+        if not page_id:
+            errors.append("普通页面缺少 page_id")
+            continue
+        if page_id in valid_page_ids:
+            errors.append(f"dimension-pages.json 存在重复 page_id：{page_id}")
+        valid_page_ids.add(page_id)
+        if not page.get("key") or not page.get("title"):
+            errors.append(f"普通页面缺少 key 或 title：{page_id}")
+        if not isinstance(page.get("readable"), bool):
+            errors.append(f"普通页面 readable 必须是布尔值：{page_id}")
+        depth = page.get("depth")
+        if not isinstance(depth, int) or depth < 0 or depth > 2:
+            errors.append(f"普通页面 depth 必须是 0 到 2 的整数：{page_id}")
+
     lookup = index.get("lookup")
     if not isinstance(lookup, dict):
         errors.append("notion-index.json lookup 必须是对象")
+    elif not isinstance(lookup.get("page_titles"), dict):
+        errors.append("notion-index.json lookup.page_titles 必须是对象")
 
     semantic_map = loaded["semantic-map.json"].get("concepts")
     if not isinstance(semantic_map, dict):
@@ -106,6 +132,11 @@ def validate(config_dir: Path) -> list[str]:
             if rule.get("status") != expected_status:
                 errors.append(f"语义规则状态与目标数量不一致：{key}")
             for target in targets:
+                if target.get("kind") == "page":
+                    page_id = str(target.get("page_id") or "")
+                    if page_id not in valid_page_ids:
+                        errors.append(f"语义 {key} 引用了不存在的 page_id：{page_id}")
+                    continue
                 source_id = str(target.get("data_source_id") or "")
                 if source_id not in valid_source_ids:
                     errors.append(f"语义 {key} 引用了不存在的 data_source_id：{source_id}")
@@ -125,9 +156,6 @@ def validate(config_dir: Path) -> list[str]:
         if not value or not (config_dir / str(value)).is_file():
             errors.append(f"profile.json 引用文件不存在：{key}")
 
-    pages = loaded["dimension-pages.json"].get("pages")
-    if not isinstance(pages, list):
-        errors.append("dimension-pages.json pages 必须是数组")
     discovery = loaded["discovery.json"]
     if not isinstance(discovery.get("candidates"), list):
         errors.append("discovery.json candidates 必须是数组")

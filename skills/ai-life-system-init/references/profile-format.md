@@ -17,12 +17,12 @@
 - `discovery.json`：原始发现证据；
 - `notion-index.json`：事实索引和 lookup；
 - `semantic-map.json`：只包含实际匹配概念；
-- `dimension-pages.json`：非数据库页面；
+- `dimension-pages.json`：系统入口及其直接子页面的结构身份，不保存正文；
 - `initialization-report.md`：实际结构与真实故障摘要。
 
 `notion-schema.json` 和 `routing-rules.json` 是旧版兼容文件。新 Skill 必须先读取 `profile.json`，再使用其中的 `source_index_file` 与 `semantic_map_file`。
 
-具体 Skill 不应重复这一加载逻辑；统一调用 `scripts/runtime.py status/resolve/check-write`。缺少配置时 Runtime 会返回 `needs_init`，由用户运行 `$ai-life-system-init`。
+具体 Skill 不应重复这一加载逻辑；统一调用 `scripts/runtime.py status/resolve/check-write/check-page-write`。缺少配置时 Runtime 会返回 `needs_init`，由用户运行 `$ai-life-system-init`。
 
 ## 指纹与隐私
 

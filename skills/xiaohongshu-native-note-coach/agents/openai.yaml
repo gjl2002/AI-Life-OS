@@ -1,0 +1,4 @@
+interface:
+  display_name: "小红书创作教练"
+  short_description: "用真实图片证据生成小红书原生图文笔记和发布复用建议"
+  default_prompt: "Use $xiaohongshu-native-note-coach to turn my images, scene, and evidence into a Xiaohongshu native note."

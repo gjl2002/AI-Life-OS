@@ -1,0 +1,6 @@
+interface:
+  display_name: "公众号创作教练"
+  short_description: "基于云端 Notion 证据完成公众号长文、标题与发布前审校"
+  default_prompt: "Use $wechat-article-writing-coach to turn my topic, draft, or one-sentence idea into a publishable WeChat article with title options, using layered cloud Notion evidence retrieval, a temporary style card, verified sources, benchmark patterns, and the full revision workflow."
+policy:
+  allow_implicit_invocation: true

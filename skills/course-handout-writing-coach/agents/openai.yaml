@@ -1,0 +1,4 @@
+interface:
+  display_name: "课程讲义写作教练"
+  short_description: "把稳定课程结构写成可学习可行动可交付的讲义"
+  default_prompt: "Use $course-handout-writing-coach to turn this lesson outline into an actionable handout, reading only the necessary cloud Notion context and adding PPT or live-delivery materials only when requested."

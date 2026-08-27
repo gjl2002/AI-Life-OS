@@ -22,6 +22,7 @@
 - `database_titles`：数据库容器标题到真实 ID；
 - `property_names`：字段名到所在 Data Source 和字段类型；
 - `option_names`：select、multi_select、status 选项到所在字段。
+- `page_titles`：普通页面标题到真实 page ID、父页面和可读状态。
 
 键使用 NFKC、转小写并移除常见分隔符后的规范化文本。值始终是数组，因为相同名称可以合法地出现在多个 Data Source 中。
 
@@ -30,12 +31,17 @@
 语义映射只包含当前索引里实际找到的概念：
 
 - `kind: source` 指向 Data Source；
+- `kind: page` 指向 `dimension-pages.json` 中已绑定的普通页面；
 - `kind: property` 指向字段；
 - `kind: option` 指向字段中的真实选项；
 - `status: ready` 表示唯一目标；
 - `status: multiple` 表示多个真实目标，需要结合业务上下文选择。
 
 没有匹配的概念直接省略，不使用 `missing`。
+
+## dimension-pages.json
+
+每个普通页面保存稳定 key、标题、page ID、URL、最后编辑时间、父页面、发现深度、来源和可读状态。它只负责页面身份，不保存页面正文。Hub 为深度 0，系统入口为深度 1，系统入口的直接子页面为深度 2。
 
 ## 兼容文件
 

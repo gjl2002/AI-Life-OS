@@ -1,0 +1,4 @@
+interface:
+  display_name: "商品详情页设计"
+  short_description: "把文案与素材设计成多图中文商品详情页"
+  default_prompt: "使用 $product-detail-page-design 为我的产品制作一套多张、尺寸随内容变化的完整商品详情页。"

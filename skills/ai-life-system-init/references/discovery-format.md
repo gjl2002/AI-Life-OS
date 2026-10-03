@@ -35,8 +35,8 @@
   "last_edited_time": "2026-08-22T01:00:00.000Z",
   "source": "child_database",
   "source_page_id": "hub-page-id",
-  "source_section": "12周行动",
-  "detection_reason": "来自 Hub 的 12周行动区块",
+  "source_section": "成长系统 / 行动看板",
+  "detection_reason": "来自 Hub 的成长系统选项卡 / 行动看板区块",
   "selected": true,
   "retrieve_failed": false,
   "error": "",
@@ -45,7 +45,9 @@
 }
 ```
 
-允许的 `source` 包括 `child_database`、`database_mention`、`link_to_page`、`rich_text_link`、`block_url` 和 `manual`。未知来源也可保留，但不能伪装成 Hub 直接发现。
+`source_section` 可以记录选项卡名和可见标题分组路径，例如 `成长系统 / 行动看板`；它是路由线索，不是数据库身份。允许的 `source` 包括 `child_database`、`database_mention`、`link_to_page`、`rich_text_link`、`block_url` 和 `manual`。未知来源也可保留，但不能伪装成 Hub 直接发现。
+
+当 Hub 使用 Notion `tabs` / `tab` 布局时，选项卡标题（例如“成长系统”）作为逻辑系统分组，不添加到 `dimension_pages`，也不生成虚构 page ID。遍历选项卡内可读取的数据库引用及其纯布局嵌套块，并把来源选项卡和标题分组写入候选的 `source_section` 与 `detection_reason`。数据库在选项卡内换列或换位置后仍以稳定 Notion ID 去重；如果读取工具未返回选项卡内容，保留读取限制并允许用户手动补充，不推断缺失。
 
 同一个规范化 Notion ID 只保留一个候选；合并时保留最明确的来源和全部检测说明。`selected` 默认为 `true`，显式为 `false` 的候选只进入发现索引，不进入路由配置。
 

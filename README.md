@@ -1,8 +1,8 @@
 # AI Life OS Skill 套件
 
-版本：`2.1.0`
+版本：`2.2.0`
 
-AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入自己的 AI 助手。本版本包含 35 个功能 Skill，以及 1 个内容创作共享依赖。需要 Notion 数据的 Skill 共用 `ai-life-system-init`；学员只需连接并初始化自己的 Notion 一次，不需要逐个配置数据库。
+AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入自己的 AI 助手。本版本包含 36 个功能 Skill，以及 1 个内容创作共享依赖。需要 Notion 数据的 Skill 共用 `ai-life-system-init`；学员只需连接并初始化自己的 Notion 一次，不需要逐个配置数据库。
 
 ## 成长系统
 
@@ -72,6 +72,7 @@ AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入�
 |---|---|---|
 | `task-tracker` | 快速记录任务和待办，整理日期、项目等信息；也可辅助提取截图中的任务。 | “提醒我明天下午给客户发方案。” |
 | `expense-tracker` | 记录支出、收入、账户转账、订阅和报销，并在你的财务结构支持时关联分类或报表。 | “午饭 38 元，记一笔。” |
+| `season-sync` | 将个人 12 周赛季与选定的游戏、体育或活动赛季对齐，核实官方赛季名与海报后更新自己的复盘记录。 | “把这轮 12 周赛季同步到王者荣耀最新正式服赛季。” |
 
 这些 Skills 使用你自己连接的 Notion 结构。若无法确认目标数据库或字段，Skill 会先提醒你，不会套用发布者的页面或个人记录。身体、财务和情绪等信息由你决定是否记录。
 
@@ -84,7 +85,7 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 "$HOME/.ai-life-os/install.sh"
 ```
 
-安装脚本会将 36 个 Skill/共享依赖复制到当前用户的：
+安装脚本会将 37 个 Skill/共享依赖复制到当前用户的：
 
 ```text
 ~/.codex/skills/

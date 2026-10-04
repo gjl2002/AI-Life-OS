@@ -13,7 +13,7 @@ from typing import Any, Optional
 from build_config import canonical_notion_id, normalize_text
 
 
-RUNTIME_VERSION = "1.2.0"
+RUNTIME_VERSION = "1.3.0"
 
 
 class RuntimeConfigError(ValueError):
@@ -78,6 +78,8 @@ def runtime_status(bundle: dict[str, Any]) -> dict[str, Any]:
         "health": health,
         "workspace": profile.get("workspace", {}),
         "hub": profile.get("hub", {}),
+        "selected_modules": profile.get("selected_modules", ["growth", "commercial", "life"]),
+        "module_roots": profile.get("module_roots", []),
         "initialized_at": profile.get("initialized_at", ""),
         "index_generated_at": index.get("generated_at", ""),
         "source_count": len(index["sources"]),
@@ -353,6 +355,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         if args.command == "resolve":
             kind = next(kind for kind in ("concept", "source", "property", "option", "page") if getattr(args, kind) is not None)
             result = resolve(bundle, kind, getattr(args, kind))
+            result["module_context"] = {
+                "selected_modules": bundle["profile"].get("selected_modules", ["growth", "commercial", "life"]),
+                "note": "只在已连接模块的本地索引中解析；未选择模块未被扫描。" if result["status"] == "not_found" else "",
+            }
             print_json(result)
             return 3 if result["status"] == "not_found" else 0
         if args.command == "check-page-write":

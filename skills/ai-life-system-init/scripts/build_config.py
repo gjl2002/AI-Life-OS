@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 SCHEMA_VERSION = "0.4"
 ACCEPTED_DISCOVERY_VERSIONS = {"0.2", "0.3", SCHEMA_VERSION}
+MODULE_KEYS = {"growth", "commercial", "life"}
 OUTPUT_FILES = (
     "profile.json",
     "discovery.json",
@@ -160,6 +161,7 @@ def normalize_candidate(raw: dict[str, Any]) -> dict[str, Any]:
         "source": str(raw.get("source") or "unknown"),
         "source_page_id": canonical_notion_id(raw.get("source_page_id")),
         "source_section": str(raw.get("source_section") or raw.get("module") or ""),
+        "module_keys": sorted({str(value) for value in raw.get("module_keys", ([raw.get("module_key")] if raw.get("module_key") else [])) if str(value) in MODULE_KEYS}),
         "detection_reason": str(raw.get("detection_reason") or ""),
         "selected": bool(raw.get("selected", not bool(raw.get("archived", False)))),
         "retrieve_failed": bool(raw.get("retrieve_failed", False)),
@@ -180,6 +182,7 @@ def merge_candidate(existing: dict[str, Any], incoming: dict[str, Any]) -> dict[
         if (not merged.get(key) or merged.get(key) == "unknown") and incoming.get(key):
             merged[key] = incoming[key]
     merged["selected"] = bool(existing.get("selected") or incoming.get("selected"))
+    merged["module_keys"] = sorted(set(existing.get("module_keys", [])) | set(incoming.get("module_keys", [])))
     merged["retrieve_failed"] = bool(existing.get("retrieve_failed") and incoming.get("retrieve_failed"))
     merged["archived"] = bool(existing.get("archived") and incoming.get("archived"))
     if incoming.get("user_override"):
@@ -261,13 +264,53 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
     input_version = str(raw.get("schema_version") or "")
     if input_version and input_version not in ACCEPTED_DISCOVERY_VERSIONS:
         raise ConfigError(f"discovery schema_version 不受支持：{input_version}")
-    hub = raw.get("hub")
-    if not isinstance(hub, dict):
-        raise ConfigError("discovery.hub 必须是对象")
-    if "readable" not in hub:
-        raise ConfigError("discovery.hub.readable 必须来自真实读取结果")
-    if not hub.get("page_id"):
-        raise ConfigError("discovery.hub.page_id 不能为空")
+    hub = raw.get("hub") if isinstance(raw.get("hub"), dict) else {}
+    raw_roots = raw.get("module_roots")
+    if not isinstance(raw_roots, list):
+        raw_roots = []
+    roots = []
+    for item in raw_roots:
+        if not isinstance(item, dict):
+            continue
+        module_key = str(item.get("module_key") or "")
+        page_id = canonical_notion_id(item.get("page_id"))
+        if module_key not in MODULE_KEYS or not page_id or "readable" not in item:
+            raise ConfigError("module_roots 每项必须包含有效 module_key、page_id 和真实 readable 结果")
+        roots.append({
+            "module_key": module_key,
+            "entry_kind": str(item.get("entry_kind") or "module_page"),
+            "page_id": page_id,
+            "title": str(item.get("title") or module_key),
+            "url": str(item.get("url") or ""),
+            "last_edited_time": str(item.get("last_edited_time") or ""),
+            "readable": bool(item.get("readable")),
+        })
+    selected = raw.get("selected_modules")
+    if isinstance(selected, list):
+        selected_modules = list(dict.fromkeys(str(value) for value in selected if str(value) in MODULE_KEYS))
+    elif roots:
+        selected_modules = list(dict.fromkeys(root["module_key"] for root in roots))
+    else:
+        # Legacy one-Hub discovery represented the combined system.
+        selected_modules = ["growth", "commercial", "life"] if hub.get("page_id") else []
+    if not selected_modules:
+        selected_modules = list(dict.fromkeys(root["module_key"] for root in roots))
+    if not selected_modules:
+        raise ConfigError("请至少选择一个模块，并提供可读取的 Hub 或 module_roots")
+    if not roots:
+        if not hub.get("page_id") or "readable" not in hub:
+            raise ConfigError("单 Hub 模式必须提供真实的 hub.page_id 和 hub.readable")
+        roots = [{
+            "module_key": module,
+            "entry_kind": "shared_hub",
+            "page_id": canonical_notion_id(hub["page_id"]),
+            "title": str(hub.get("title") or "未命名 Hub"),
+            "url": str(hub.get("url") or ""),
+            "last_edited_time": str(hub.get("last_edited_time") or ""),
+            "readable": bool(hub.get("readable")),
+        } for module in selected_modules]
+    if any(root["module_key"] not in selected_modules for root in roots):
+        raise ConfigError("module_roots 不能包含未选择的模块")
 
     raw_candidates = raw.get("candidates")
     if not isinstance(raw_candidates, list):
@@ -308,12 +351,14 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "discovered_at": str(raw.get("discovered_at") or utc_now()),
         "workspace": {"id": str(workspace.get("id") or ""), "name": str(workspace.get("name") or "未知工作区")},
+        "selected_modules": selected_modules,
+        "module_roots": roots,
         "hub": {
-            "page_id": canonical_notion_id(hub.get("page_id")),
-            "title": str(hub.get("title") or "未命名 Hub"),
-            "url": str(hub.get("url") or ""),
-            "last_edited_time": str(hub.get("last_edited_time") or ""),
-            "readable": bool(hub.get("readable")),
+            "page_id": canonical_notion_id(hub.get("page_id") or roots[0]["page_id"]),
+            "title": str(hub.get("title") or roots[0]["title"]),
+            "url": str(hub.get("url") or roots[0]["url"]),
+            "last_edited_time": str(hub.get("last_edited_time") or roots[0]["last_edited_time"]),
+            "readable": bool(hub.get("readable", any(root["readable"] for root in roots))),
         },
         "candidates": sorted(by_id.values(), key=lambda item: (normalize_text(item["source_section"]), normalize_text(item["title"]), item["database_id"])),
         "dimension_pages": sorted(pages_by_id.values(), key=lambda item: (item["depth"], normalize_text(item["title"]), item["page_id"])),
@@ -385,6 +430,7 @@ def schema_sources(discovery: dict[str, Any], generated_at: str) -> list[dict[st
                 "source": candidate["source"],
                 "source_page_id": candidate["source_page_id"],
                 "source_section": candidate["source_section"],
+                "module_keys": candidate["module_keys"],
                 "detection_reason": candidate["detection_reason"],
                 "last_edited_time": source["last_edited_time"] or candidate["last_edited_time"],
                 "last_fetched_at": discovery["discovered_at"] or generated_at,
@@ -477,6 +523,7 @@ def build_lookup(sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> 
             "database_id": source["database_id"],
             "data_source_id": source["data_source_id"],
             "title": source["title"],
+            "module_keys": source.get("module_keys", []),
         }
         add_lookup(source_titles, source["title"], source_ref)
         add_lookup(database_titles, source["database_title"], source_ref)
@@ -589,11 +636,15 @@ def build_semantic_map(concepts: list[dict[str, Any]], sources: list[dict[str, A
 
 def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]], pages: list[dict[str, Any]]) -> tuple[str, list[str]]:
     warnings = []
-    if not discovery["hub"]["readable"]:
-        return "blocked", ["Hub 无法读取"]
+    readable_roots = [root for root in discovery["module_roots"] if root["readable"]]
+    if not readable_roots:
+        return "blocked", ["所有已选择模块的入口页面均无法读取"]
     usable = [source for source in sources if not source["retrieve_failed"]]
     if not usable:
         return "blocked", ["没有任何可用 Data Source Schema"]
+    failed_roots = [root for root in discovery["module_roots"] if not root["readable"]]
+    if failed_roots:
+        warnings.append(f"{len(failed_roots)} 个已选择模块入口不可读取")
 
     failed_sources = [source for source in sources if source["retrieve_failed"]]
     if failed_sources:
@@ -607,7 +658,7 @@ def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]], pag
     unreadable_pages = [page for page in pages if not page["readable"]]
     if unreadable_pages:
         warnings.append(f"{len(unreadable_pages)} 个普通页面不可读取")
-    return ("needs_attention" if failed_sources or failed_smoke or unreadable_pages else "ready"), warnings
+    return ("needs_attention" if failed_roots or failed_sources or failed_smoke or unreadable_pages else "ready"), warnings
 
 
 def render_report(
@@ -628,7 +679,8 @@ def render_report(
         f"- 生成时间：`{generated_at}`",
         f"- 索引格式：`{SCHEMA_VERSION}`",
         f"- 工作区：`{discovery['workspace']['name']}`",
-        f"- Hub：{discovery['hub']['title']} (`{discovery['hub']['page_id']}`)",
+        f"- 已选择模块：{', '.join(discovery['selected_modules'])}",
+        f"- 模块入口：{len(discovery['module_roots'])} 个",
         f"- 整体状态：`{health}`",
         f"- 候选数据库：`{len(discovery['candidates'])}`，已选择：`{selected_count}`",
         f"- Data Source：`{len(sources)}`，可读取：`{readable_count}`",
@@ -711,6 +763,8 @@ def build_outputs(discovery: dict[str, Any], semantics: dict[str, Any]) -> dict[
         "initialized_at": generated_at,
         "workspace": discovery["workspace"],
         "hub": discovery["hub"],
+        "selected_modules": discovery["selected_modules"],
+        "module_roots": discovery["module_roots"],
         "semantic_concepts": profile_concepts,
         "source_index_file": "notion-index.json",
         "schema_compat_file": "notion-schema.json",
@@ -720,7 +774,7 @@ def build_outputs(discovery: dict[str, Any], semantics: dict[str, Any]) -> dict[
         "dimension_pages_file": "dimension-pages.json",
         "health": {
             "status": health,
-            "hub_readable": discovery["hub"]["readable"],
+            "hub_readable": any(root["readable"] for root in discovery["module_roots"]),
             "schema_readable": any(not source["retrieve_failed"] for source in sources),
             "smoke_test": "failed" if any(test["status"] == "failed" for test in discovery["smoke_tests"]) else "passed" if any(test["status"] == "passed" for test in discovery["smoke_tests"]) else "not_run",
             "warnings": warnings,
@@ -731,6 +785,8 @@ def build_outputs(discovery: dict[str, Any], semantics: dict[str, Any]) -> dict[
         "generated_at": generated_at,
         "workspace": discovery["workspace"],
         "hub": discovery["hub"],
+        "selected_modules": discovery["selected_modules"],
+        "module_roots": discovery["module_roots"],
         "sources": sources,
         "lookup": lookup,
     }

@@ -7,7 +7,7 @@
 每个 Data Source 保存：
 
 - `database_id`、`data_source_id`、数据库标题、Data Source 标题和 URL；
-- 来源 Hub、区块、检测原因、最后编辑和抓取时间；
+- 来源入口、模块归属、区块、检测原因、最后编辑和抓取时间；
 - `properties`、`relations`、`writable_fields`、`readonly_fields`；
 - `schema_fingerprint`、`retrieve_failed` 和错误信息；
 - `access.read_ready`、`access.create_page_ready`、标题字段和阻塞原因。
@@ -41,7 +41,7 @@
 
 ## dimension-pages.json
 
-每个普通页面保存稳定 key、标题、page ID、URL、最后编辑时间、父页面、发现深度、来源和可读状态。它只负责页面身份，不保存页面正文。Hub 为深度 0，系统入口为深度 1，系统入口的直接子页面为深度 2。
+每个普通页面保存稳定 key、标题、page ID、URL、最后编辑时间、父页面、发现深度、来源和可读状态。它只负责页面身份，不保存页面正文。模块入口为深度 1，模块入口的直接子页面为深度 2；选项卡是定位容器，不作为虚构页面保存。
 
 ## 兼容文件
 

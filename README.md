@@ -1,6 +1,6 @@
 # AI Life OS Skill 套件
 
-版本：`2.3.0`
+版本：`2.4.0`
 
 AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入自己的 AI 助手。本版本包含 37 个功能 Skill，以及 1 个内容创作共享依赖。需要 Notion 数据的 Skill 共用 `ai-life-system-init`；学员只需连接并初始化自己的 Notion 一次，不需要逐个配置数据库。
 
@@ -105,8 +105,8 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 安装本身不需要 Notion。需要使用 Notion-backed 能力时：
 
 1. 在 Codex 中连接学员自己的 Notion。
-2. 确保学员自己的模板 Hub 已分享给当前 Notion 连接。
-3. 运行 `$ai-life-system-init`，完成一次初始化。
+2. 运行 `$ai-life-system-init`，选择已购模块并提供对应的 Notion 页面链接。多个模块可以各用独立页面，也可以共用一个 Hub。
+3. 确保所选页面已分享给当前 Notion 连接，完成初始化。
 4. 初始化成功后，直接使用其余成长系统和商业系统 Skill。
 
 初始化生成的个人配置默认位于 `~/.ai-life-system/`。该目录只属于当前学员，不应上传、分享或放回课程套件。

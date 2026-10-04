@@ -146,8 +146,22 @@ def validate(config_dir: Path) -> list[str]:
         errors.append("routing-rules.json 与 semantic-map.json 不一致")
 
     profile = loaded["profile.json"]
-    if not isinstance(profile.get("hub"), dict) or not profile["hub"].get("page_id"):
-        errors.append("profile.json 缺少 Hub page_id")
+    roots = profile.get("module_roots")
+    selected_modules = profile.get("selected_modules")
+    if not isinstance(selected_modules, list) or not selected_modules:
+        errors.append("profile.json 缺少 selected_modules")
+    if not isinstance(roots, list) or not roots:
+        if not isinstance(profile.get("hub"), dict) or not profile["hub"].get("page_id"):
+            errors.append("profile.json 缺少可用模块入口")
+    else:
+        for root in roots:
+            if not isinstance(root, dict) or root.get("module_key") not in {"growth", "commercial", "life"} or not root.get("page_id"):
+                errors.append("profile.json module_roots 项目无效")
+                continue
+            if root.get("module_key") not in selected_modules:
+                errors.append("profile.json module_roots 包含未选择模块")
+            if not isinstance(root.get("readable"), bool):
+                errors.append("profile.json module_roots.readable 必须为布尔值")
     health = profile.get("health") if isinstance(profile.get("health"), dict) else {}
     if health.get("status") not in {"ready", "needs_attention", "blocked"}:
         errors.append("profile.json health.status 无效")

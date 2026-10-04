@@ -21,6 +21,7 @@ from typing import Any, Optional
 SCHEMA_VERSION = "0.4"
 ACCEPTED_DISCOVERY_VERSIONS = {"0.2", "0.3", SCHEMA_VERSION}
 MODULE_KEYS = {"growth", "commercial", "life"}
+MODULE_LABELS = {"growth": "成长系统", "commercial": "商业系统", "life": "生活系统"}
 OUTPUT_FILES = (
     "profile.json",
     "discovery.json",
@@ -679,7 +680,7 @@ def render_report(
         f"- 生成时间：`{generated_at}`",
         f"- 索引格式：`{SCHEMA_VERSION}`",
         f"- 工作区：`{discovery['workspace']['name']}`",
-        f"- 已选择模块：{', '.join(discovery['selected_modules'])}",
+        f"- 已选择模块：{', '.join(MODULE_LABELS[key] for key in discovery['selected_modules'])}",
         f"- 模块入口：{len(discovery['module_roots'])} 个",
         f"- 整体状态：`{health}`",
         f"- 候选数据库：`{len(discovery['candidates'])}`，已选择：`{selected_count}`",
@@ -691,6 +692,10 @@ def render_report(
         "| 数据源 | 属性数 | 可读取 | 可创建页面 |",
         "| --- | ---: | --- | --- |",
     ]
+    for root in discovery["module_roots"]:
+        label = MODULE_LABELS[root["module_key"]]
+        state = "可读取" if root["readable"] else "不可读取"
+        lines.insert(7, f"- {label}入口：{root['title']}（{state}）")
     for source in sources:
         lines.append(f"| {source['title']} | `{len(source['properties'])}` | `{'true' if source['access']['read_ready'] else 'false'}` | `{'true' if source['access']['create_page_ready'] else 'false'}` |")
 

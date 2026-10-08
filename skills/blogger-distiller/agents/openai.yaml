@@ -1,0 +1,6 @@
+interface:
+  display_name: "博主整理助手"
+  short_description: "从小红书数据提炼博主内容模型并生成创作 Skill"
+  default_prompt: "Use $blogger-distiller to analyze this creator's Xiaohongshu spreadsheet and extract their content patterns."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI 员工"
+  short_description: "帮你调度商业 Skills，推进策略、产品、内容与增长任务"
+  default_prompt: "请使用 $ai-employee，帮我把这项商业任务推进到清晰的判断或可交付成果。"
+policy:
+  allow_implicit_invocation: true

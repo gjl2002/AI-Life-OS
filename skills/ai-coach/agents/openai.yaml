@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI 教练"
+  short_description: "帮你厘清个人方向、理解卡点、规划目标并从经历中找到下一步"
+  default_prompt: "请使用 $ai-coach，陪我把现在这件事理清楚，找到最合适的下一步。"
+policy:
+  allow_implicit_invocation: true

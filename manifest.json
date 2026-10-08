@@ -1,7 +1,7 @@
 {
   "suite_name": "ai-life-os-skill-suite",
-  "suite_version": "2.4.0",
-  "published_at": "2026-10-04",
+  "suite_version": "2.5.0",
+  "published_at": "2026-10-08",
   "entry_skill": "ai-life-system-init",
   "install_target": "~/.codex/skills/",
   "life_system_skills": [
@@ -25,7 +25,10 @@
     "product-detail-page-design",
     "wechat-article-writing-coach",
     "wechat-moments-writing-coach",
-    "xiaohongshu-native-note-coach"
+    "xiaohongshu-native-note-coach",
+    "fish-cooking",
+    "blogger-distiller",
+    "long-form-writer"
   ],
   "shared_dependencies": [
     "humanizer-zh"
@@ -68,7 +71,12 @@
     "season-sync",
     "tool-tracker",
     "travel-tracker",
-    "wardrobe-tracker"
+    "wardrobe-tracker",
+    "ai-coach",
+    "ai-employee",
+    "fish-cooking",
+    "blogger-distiller",
+    "long-form-writer"
   ],
   "private_config_included": false,
   "notion_data_included": false,
@@ -95,5 +103,9 @@
     "tool-tracker",
     "travel-tracker",
     "wardrobe-tracker"
+  ],
+  "assistant_entry_skills": [
+    "ai-coach",
+    "ai-employee"
   ]
 }

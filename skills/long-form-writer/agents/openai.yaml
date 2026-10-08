@@ -1,0 +1,6 @@
+interface:
+  display_name: "长文写作专家"
+  short_description: "围绕观点、经验或方法完成长文写作与打磨"
+  default_prompt: "Use $long-form-writer to help me develop this topic into a clear, well-argued long-form article."
+policy:
+  allow_implicit_invocation: true

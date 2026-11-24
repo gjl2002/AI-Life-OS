@@ -17,7 +17,7 @@
 - `todo` 应识别为“任务 → 情景 → ☑️ 待办”选项，而不是名为“待办”的数据库；
 - `focus` 可以同时指向“任务.专注”和“计时.专注”，输出 `multiple`；
 - `daily_record` 指向“每日记录”Data Source；名为“每日复盘”的 relation 或字段单独作为字段语义。
-- `commercial_positioning` 指向“商业系统”下已发现并绑定的《商业定位》普通页面，不读取本地正文。
+- `life_positioning` 指向已发现并绑定的《愿景定位》普通页面。
 
 ## 消费规则
 

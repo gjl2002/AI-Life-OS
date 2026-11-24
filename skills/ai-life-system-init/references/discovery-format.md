@@ -9,10 +9,10 @@
   "schema_version": "0.4",
   "discovered_at": "2026-08-22T10:00:00+08:00",
   "workspace": {"id": "workspace-id", "name": "学员工作区"},
-  "selected_modules": ["growth", "commercial"],
+  "selected_modules": ["growth", "life"],
   "module_roots": [
     {"module_key": "growth", "entry_kind": "module_page", "page_id": "growth-page-id", "title": "成长系统", "url": "https://www.notion.so/...", "last_edited_time": "2026-08-22T01:00:00.000Z", "readable": true},
-    {"module_key": "commercial", "entry_kind": "shared_hub", "page_id": "shared-hub-id", "title": "AI 人生系统", "url": "https://www.notion.so/...", "last_edited_time": "2026-08-22T01:00:00.000Z", "readable": true}
+    {"module_key": "life", "entry_kind": "shared_hub", "page_id": "shared-hub-id", "title": "AI 人生系统", "url": "https://www.notion.so/...", "last_edited_time": "2026-08-22T01:00:00.000Z", "readable": true}
   ],
   "hub": {
     "page_id": "hub-page-id",
@@ -27,7 +27,7 @@
 }
 ```
 
-`workspace.id` 在连接工具不暴露时可以为空，但 `workspace.name`、`selected_modules`、`module_roots` 中每个 `page_id` 与 `readable` 必须来自真实读取结果。`module_key` 只允许 `growth`、`commercial`、`life`；`entry_kind` 使用 `module_page` 或 `shared_hub`。同一个共享 Hub 可为每个选中的模块建立一项入口，并通过该模块选项卡确定扫描范围。旧版只提供 `hub` 的文件仍可读取，按三合一处理；初始化应重新询问学员实际已购模块。
+`workspace.id` 在连接工具不暴露时可以为空，但 `workspace.name`、`selected_modules`、`module_roots` 中每个 `page_id` 与 `readable` 必须来自真实读取结果。新建发现文件的 `module_key` 使用 `growth` 或 `life`。`entry_kind` 使用 `module_page` 或 `shared_hub`。同一个共享 Hub 可为每个选中的模块建立一项入口，并通过该模块选项卡确定扫描范围。旧版只提供 `hub` 的文件仍可读取。重新绑定时须显式记录用户选择的成长或生活模块。
 
 ## 候选数据库
 
@@ -96,7 +96,7 @@
 
 ## 非数据库页面
 
-`dimension_pages` 保存 Hub 直接普通页面，以及三个系统入口的直接子页面。初始化只采集结构元数据，不保存页面正文：
+`dimension_pages` 保存 Hub 直接普通页面，以及已选成长与生活系统入口的直接子页面。初始化只采集结构元数据，不保存页面正文：
 
 ```json
 {
@@ -114,7 +114,7 @@
 }
 ```
 
-Hub 为 `depth: 0`，成长系统、商业系统、生活系统或用户明确指定的系统入口为 `depth: 1`，这些入口的直接子页面为 `depth: 2`。到 `depth: 2` 后停止，不继续递归普通子页面。`user_override.capability` 可以把用户确认的页面绑定到稳定 page concept，例如 `commercial_positioning`。
+Hub 为 `depth: 0`，已选成长或生活系统入口为 `depth: 1`，这些入口的直接子页面为 `depth: 2`。到 `depth: 2` 后停止，不继续递归普通子页面。`user_override.capability` 可以把用户确认的页面绑定到稳定 page concept，例如 `life_positioning`。
 
 ## 冒烟测试
 

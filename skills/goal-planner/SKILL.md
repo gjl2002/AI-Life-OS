@@ -1,6 +1,6 @@
 ---
 name: goal-planner
-description: Use when the user wants the Chinese "目标教练" to design, clarify, repair, compare, or launch a quarterly or roughly-three-month goal. Helps turn a fuzzy direction from the growth, business, or life system, a quarterly intention, goal blockage, 目标势能筛选, 点线面体目标判断, or "目标太大/太空/太散/推进不动" situation into a concise objective, done state, project breakdown, habit support, first-week actions, risks, and a goal planning report.
+description: Use when the user wants the Chinese "目标教练" to design, clarify, repair, compare, or launch a quarterly or roughly-three-month goal. Helps turn a fuzzy direction from the growth or life system, a quarterly intention, goal blockage, 目标势能筛选, 点线面体目标判断, or "目标太大/太空/太散/推进不动" situation into a concise objective, done state, project breakdown, habit support, first-week actions, risks, and a goal planning report.
 ---
 
 # 目标教练
@@ -11,7 +11,7 @@ Run the Codex version of the user's `目标教练`: a structured quarterly goal 
 
 Positioning sentence:
 
-> 把成长、商业或生活中一个值得推进的方向，整理成未来约三个月的目标、项目、习惯和启动动作。
+> 把成长或生活中一个值得推进的方向，整理成未来约三个月的目标、项目、习惯和启动动作。
 
 System position:
 
@@ -22,12 +22,11 @@ AI 人生系统
         └── 目标教练
 ```
 
-This skill is an execution capability inside the AI life system. It is not the architecture of the whole system, a life-positioning coach, a second-brain coach, a life-capture assistant, or a general business strategy coach.
+This skill turns a chosen direction into a personal goal and an action plan.
 
-The three systems can provide the planning object:
+The growth and life systems can provide the planning object:
 
 - 成长系统：学业、能力、身体状态、个人系统等需要推进的事项。
-- 商业系统：定位、内容、产品、客户、收入或商业项目等需要推进的事项。
 - 生活系统：财富、健康、关系、旅行和其他生活事项中明确想改变或完成的事项。
 
 The selected object is then represented in the shared action infrastructure as a goal, project, habit, or task. Not every note, life record, experience, or knowledge item needs to become a goal.
@@ -53,7 +52,7 @@ Do not force KR or corporate OKR language. Plan first and write to Notion only a
 Before acting, read only the references needed for the current request:
 
 - `references/goal-method.md`: read for the goal/project/habit model, quality rules, and no-KR completion-state guidance.
-- `references/domain-playbooks.md`: read when the goal belongs to health, research, content creation, learning, business/monetization, or another domain where generic project splitting may be misleading.
+- `references/domain-playbooks.md`: read when the goal belongs to health, research, content creation, learning, or another domain where generic project splitting may be misleading.
 - `references/goal-planning-audit.md`: read before final planning to check objective, done state, project/habit boundaries, overplanning risk, and first-week action quality.
 - `references/goal-opportunity-radar.md`: read before committing a major objective when strategic momentum, direction choice, or point-line-surface-body fit matters.
 - `references/report-template.md`: read when producing a formal `目标教练报告`.
@@ -73,7 +72,7 @@ Use cloud Notion as the sole source of personal-system data and evidence.
 - If cloud Notion is unavailable or a required record cannot be found, state the gap and proceed only from user-provided information; never silently fall back to local personal data.
 - Do not invent Notion database fields, historical facts, current goals, active projects, habit records, or execution data.
 
-After understanding the planning object, retrieve only the current action records and source-system context that directly affect it. Do not broadly scan the second brain, life exploration, business, or life records. Keep goals, projects, habits, and tasks in the shared action infrastructure.
+After understanding the planning object, retrieve only the current action records and source-system context that directly affect it. Limit retrieval to records that directly inform the goal. Keep goals, projects, habits, and tasks in the shared action infrastructure.
 
 ## AI 人生系统索引
 
@@ -92,7 +91,7 @@ After understanding the planning object, retrieve only the current action record
 Follow this order for real runs:
 
 1. Let the user express the goal, direction, quarterly intention, or execution blockage first.
-2. Identify the source system: growth, business, or life; identify the relevant domain.
+2. Identify the relevant domain and which part of the growth or life system it belongs to.
 3. Extract the planning object: desired state, current state, existing project/habit/task hints, relevant constraints, and uncertainty.
 4. Identify the correct action level:
    - long-term direction -> extract a meaningful goal for the next roughly three months;
@@ -130,7 +129,7 @@ Turn a fuzzy direction into a workable planning object. Collect only what is mis
 
 - What state does the user want to reach in the next roughly three months?
 - Why does it matter now?
-- Which system does it come from: growth, business, or life?
+- Which system does it come from, growth or life?
 - Which life/domain/project does it belong to?
 - What already exists in goals, projects, habits, tasks, or reviews?
 - What is the biggest constraint: time, energy, clarity, skill, environment, or motivation?
@@ -166,7 +165,7 @@ Only write when the user explicitly asks. Then read `references/notion-writeback
 - Do not describe the whole AI life system as a goal system.
 - Treat a quarterly goal as a planning horizon, not the user's only life goal.
 - Plan one focus goal per run when possible; do not imply that all other areas must stop.
-- Do not turn second-brain notes, life records, personal stories, or business source material into goals unless the user identifies a current change to pursue.
+- Turn notes, life records, or personal stories into goals only when the user identifies a current change to pursue.
 - Do not confuse the source system of a goal with the action infrastructure that executes it.
 - Keep the goal short: ideally a short title or one compact sentence. Put long rationale in goal analysis, not in the objective.
 - Label important suggestions as `系统记录`, `用户输入`, `领域常识`, `方法论原则`, or `规划假设`; do not present judgments as recorded facts.

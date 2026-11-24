@@ -15,5 +15,5 @@ for skill_dir in "$script_dir"/skills/*; do
   fi
 done
 
-printf '已安装 %d 个 AI Life OS Skill/共享依赖到：%s\n' "$skill_count" "$skills_dir"
+printf '已安装 %d 个 AI Life OS Skill 到：%s\n' "$skill_count" "$skills_dir"
 printf '请重新打开 Codex 或新建任务，然后运行：$ai-life-system-init\n'

@@ -1,6 +1,6 @@
 ---
 name: life-positioning-coach
-description: "Use when the user wants guided multi-turn coaching for 人生定位, 定位愿景, 人生定位地图, personal direction, self-positioning, life vision, strengths, love, problem themes, evidence, anti-vision, ideal self, long-term direction, career direction, or evidence-based life choices using the user's current Notion life system. Do not use for customer, offer, product, market, monetization, or commercial positioning; use $commercial-positioning-coach instead."
+description: "Use when the user wants guided multi-turn coaching for 人生定位, 定位愿景, 人生定位地图, personal direction, self-positioning, life vision, strengths, love, problem themes, evidence, anti-vision, ideal self, long-term direction, career direction, or evidence-based life choices using the user's current Notion life system. The focus is the person's life and career direction."
 ---
 
 # Life Positioning Coach
@@ -63,7 +63,7 @@ description: "Use when the user wants guided multi-turn coaching for 人生定�
 - `references/positioning-audit.md`：阶段门槛、证据、置信度和最终输出审查。
 - `references/output-schema.md`：最终地图与假设地图结构。
 - `references/point-line-surface-body-radar.md`：当用户比较重大人生、职业或项目方向时使用。
-- `references/new-element-species-positioning.md`：当 AI 或新工具可能改变职业身份与人生方向时使用；只判断人生/职业身份，不延伸为商业定位。
+- `references/new-element-species-positioning.md`：当 AI 或新工具可能改变职业身份与人生方向时使用。
 
 ## Quality Check
 

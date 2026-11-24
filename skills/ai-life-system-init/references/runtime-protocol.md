@@ -28,8 +28,8 @@ python3 scripts/runtime.py status
 
 ```bash
 python3 scripts/runtime.py resolve --concept task
-python3 scripts/runtime.py resolve --concept commercial_positioning
-python3 scripts/runtime.py resolve --page 商业定位
+python3 scripts/runtime.py resolve --concept life_positioning
+python3 scripts/runtime.py resolve --page 愿景定位
 python3 scripts/runtime.py resolve --source 任务
 python3 scripts/runtime.py resolve --property 专注
 python3 scripts/runtime.py resolve --option 待办

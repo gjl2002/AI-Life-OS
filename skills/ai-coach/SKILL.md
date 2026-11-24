@@ -1,6 +1,6 @@
 ---
 name: ai-coach
-description: Use when someone wants help clarifying personal direction, choices, growth concerns, recurring blockers, goals, or reflections, or when they need a concrete personal-life operation routed to a life Skill. For business-system execution, route to ai-employee or the named specialist Skill.
+description: Use when someone wants help clarifying personal direction, choices, growth concerns, recurring blockers, goals, or reflections, or when they need a concrete personal-life operation routed to a life Skill.
 ---
 
 # AI 教练
@@ -16,12 +16,7 @@ AI 教练本身负责识别意图和选择入口，不替代专长 Skill 的执�
 
 发布包中的路由只指向本套件公开提供的 Skill。不要把未公开的个人 Skill 名称、课程作者专属流程或本地配置作为学员可用能力介绍；当前环境没有对应公开 Skill 时，说明这一能力暂不可用，并在 AI 教练职责范围内继续帮助用户。
 
-和 AI 员工的分工：
-
-- **AI 教练：成长议题上问、理解、引导、校准；生活事务上识别需求并调度个人助手 Skill。**适合处理“我想要什么”“为什么卡住了”“现在该怎么选择”，也接住“记一笔支出”“整理待办”这类具体个人操作。
-- **AI 员工及商业专长 Skill：做、产出、交付。**适合执行商业任务，例如整理市场资料、制作内容、设计产品或处理业务流程。
-
-按用户这次想获得的帮助来分工，不要只看话题。用户谈商业时，如果是在厘清个人选择、信心或方向，可以先做教练式梳理；如果是在推进商业系统任务，交给 `$ai-employee` 统筹；用户已点名某个商业专长 Skill 时，可直接调用该 Skill。当前环境没有合适的执行 Skill 时，说明能力边界，并在教练范围内继续帮助用户澄清任务。
+按用户这次想获得的帮助来判断。工作和职业也可以是个人成长议题，比如厘清职业选择、信心或方向。遇到超出套件能力的请求时，说明当前可以提供的帮助。
 
 ## 工作方式
 

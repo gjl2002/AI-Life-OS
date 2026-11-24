@@ -1,15 +1,12 @@
 # AI Life OS Skill 套件
 
-版本：`2.5.0`
+版本 `3.0.0`
 
-AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入自己的 AI 助手。本版本包含 42 个功能 Skill，以及 1 个内容创作共享依赖。需要 Notion 数据的 Skill 共用 `ai-life-system-init`；学员只需连接并初始化自己的 Notion 一次，不需要逐个配置数据库。
+AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 28 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
 
 ## AI 工作入口
 
-- `ai-coach`（AI 教练）：识别用户是在厘清成长问题，还是需要完成生活系统中的个人事务，再调用本套件公开的专长 Skill。
-- `ai-employee`（AI 员工）：识别商业任务，并在公开的商业 Skill 中选择当前需要的能力，推进到判断或交付。
-
-两个入口只引用本套件公开提供的 Skill，不包含课程作者未公开的个人 Skill 路由。
+瑶妹（`ai-coach`）是成长与生活系统的入口。你可以请她一起厘清方向或目标，也可以直接交代一件生活事务，由她调用对应的 Skill。
 
 ## 成长系统
 
@@ -23,27 +20,7 @@ AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入�
 8. `information-source-daily-briefing`：信息源日报。
 9. `sop-builder`：SOP 构建。
 
-## 商业系统
-
-1. `commercial-positioning-coach`：商业定位教练。
-2. `user-avatar-coach`：用户画像教练。
-3. `product-opportunity-coach`：产品机会教练。
-4. `product-architecture-coach`：产品架构教练。
-5. `product-experience-coach`：产品体验教练。
-6. `course-handout-writing-coach`：课程讲义写作教练。
-7. `product-detail-page-design`：产品详情页设计教练。
-8. `wechat-article-writing-coach`：公众号创作教练。
-9. `wechat-moments-writing-coach`：朋友圈创作教练。
-10. `xiaohongshu-native-note-coach`：小红书创作教练。
-11. `fish-cooking`：把同一份长内容改编为不同平台的原生内容。
-12. `blogger-distiller`：从小红书数据表提炼博主的选题和内容模型。
-13. `long-form-writer`：撰写观点文章、经验复盘、教程和行业分析长文。
-
-## 共享依赖
-
-- `humanizer-zh`：为内容创作 Skill 提供通用的去 AI 味检查。
-
-## 生活记录、知识与行动 Skills
+## 生活系统
 
 这些 Skills 把你用自然语言说的记录和请求整理到你自己的 Notion 中。你可以只安装需要的能力，也可以按场景组合使用。
 
@@ -55,10 +32,10 @@ AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入�
 | `emotion-tracker` | 整理你讲述的情绪和事件，保存为情绪记录。 | “今天开会后很挫败，帮我记录下。” |
 | `health-tracker` | 记录体重、腰围等你明确提供的身体数据。 | “今天体重 62 公斤。” |
 | `food-tracker` | 记录吃了什么；提供照片时可协助识别食物并整理营养信息。 | “记录午饭：鸡胸肉、米饭和西兰花。” |
-| `life-moment-tracker` | 保存重要经历、转折、高光、低谷或觉察，并在合适时关联目标或故事线。 | “记下今天第一次独立做完产品发布。” |
+| `life-moment-tracker` | 保存重要经历、转折、高光、低谷或觉察，并在合适时关联目标或故事线。 | “记下今天第一次独自完成半程马拉松。” |
 | `travel-tracker` | 整理旅行愿望、计划、逐日行程、地点和旅行支出。 | “帮我计划 3 天成都行，周五出发。” |
 
-### 知识与内容
+### 知识与信息
 
 | Skill | 能做什么 | 什么时候用 |
 |---|---|---|
@@ -81,7 +58,7 @@ AI Life OS Skills 帮你把目标、内容创作和日常生活工作流接入�
 
 | Skill | 能做什么 | 什么时候用 |
 |---|---|---|
-| `task-tracker` | 快速记录任务和待办，整理日期、项目等信息；也可辅助提取截图中的任务。 | “提醒我明天下午给客户发方案。” |
+| `task-tracker` | 快速记录任务和待办，整理日期、项目等信息；也可辅助提取截图中的任务。 | “帮我记下明天下午去取快递。” |
 | `expense-tracker` | 记录支出、收入、账户转账、订阅和报销，并在你的财务结构支持时关联分类或报表。 | “午饭 38 元，记一笔。” |
 | `season-sync` | 将个人 12 周赛季与选定的游戏、体育或活动赛季对齐，核实官方赛季名与海报后更新自己的复盘记录。 | “把这轮 12 周赛季同步到王者荣耀最新正式服赛季。” |
 
@@ -96,7 +73,7 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 "$HOME/.ai-life-os/install.sh"
 ```
 
-安装脚本会将 43 个 Skill/共享依赖复制到当前用户的：
+安装脚本会将 28 个 Skill 复制到当前用户的目录。
 
 ```text
 ~/.codex/skills/
@@ -115,9 +92,9 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 安装本身不需要 Notion。需要使用 Notion-backed 能力时：
 
 1. 在 Codex 中连接学员自己的 Notion。
-2. 运行 `$ai-life-system-init`，选择已购模块并提供对应的 Notion 页面链接。多个模块可以各用独立页面，也可以共用一个 Hub。
+2. 运行 `$ai-life-system-init`，选择成长系统、生活系统或两者，并提供对应的 Notion 页面链接。两个模块可以各用独立页面，也可以共用一个 Hub。
 3. 确保所选页面已分享给当前 Notion 连接，完成初始化。
-4. 初始化成功后，直接使用其余成长系统和商业系统 Skill。
+4. 初始化成功后，可以从 `$ai-coach` 开始，也可以直接调用需要的成长或生活 Skill。
 
 初始化生成的个人配置默认位于 `~/.ai-life-system/`。该目录只属于当前学员，不应上传、分享或放回课程套件。
 
@@ -127,15 +104,9 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 - 本地 Runtime 索引只保存数据库结构、字段、选项和路由信息。
 - 套件不包含发布者或学员的 Notion ID、页面内容、token、邮箱及个人配置。
 - 云端不可用时，具体 Skill 不使用本地导出或同步副本冒充实时资料。
-- 商业系统公开导出不包含发布者个人样稿、账号数据、私域内容或个人文风语料。
 
 ## 更新
 
-用新版本仓库重新运行 `install.sh` 即可。模板结构发生变化时，再运行一次 `$ai-life-system-init`。
+在仓库目录运行 `git pull --ff-only` 和 `./install.sh`，然后重新打开 Codex。模板结构发生变化时，再运行一次 `$ai-life-system-init`。
 
-## 去重与版本说明
-
-- 成长系统中与仓库已有的同名 Skill 保留已接入 Runtime 的较新版本，未用旧导出覆盖。
-- 商业系统新增 10 个 Skill。
-- `ai-life-system-init` 只保留一份，采用包含成长系统、商业系统和普通页面发现能力的新版。
-- 不复制导出目录中的 `.DS_Store`、Notion 数据、同步 Markdown 或个人配置。
+从 2.5.0 升级时，安装脚本只覆盖本版本提供的 Skill。若希望从 Codex 中移除旧版附带的商业 Skill，请到原安装目录手动清理。

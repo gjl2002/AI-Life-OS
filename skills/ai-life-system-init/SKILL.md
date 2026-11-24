@@ -1,6 +1,6 @@
 ---
 name: ai-life-system-init
-description: "初始化、重新绑定、健康检查并为其他 Skill 提供学员自己的 AI 人生系统 Notion 运行时底座。开始时由用户选择已购买并要连接的成长、商业、生活模块，可提交一个或多个模块页面；按已选入口有限发现数据库、字段、选项和关系并建立本地事实索引。适用于首次连接、重新复制模板、切换工作区、页面或 Schema 变化，以及其他 AI 人生系统 Skill 需要定位真实 Notion 结构时。"
+description: "初始化、重新绑定、健康检查并为其他 Skill 提供学员自己的 AI 人生系统 Notion 运行时底座。开始时由用户选择要连接的成长和生活模块，可提交一个或多个模块页面；按已选入口有限发现数据库、字段、选项和关系并建立本地事实索引。适用于首次连接、重新复制模板、切换工作区、页面或 Schema 变化，以及其他 AI 人生系统 Skill 需要定位真实 Notion 结构时。"
 ---
 
 # AI 人生系统底座
@@ -12,7 +12,7 @@ description: "初始化、重新绑定、健康检查并为其他 Skill 提供�
 初始化、重新绑定和健康检查只读 Notion。`runtime` 只解析本地索引并预检，不自行执行业务写入。不要要求用户把 Notion token 粘贴到聊天中。
 
 ```text
-用户选择已购模块并提供一个或多个入口链接
+用户选择成长系统、生活系统或两者，并提供入口链接
   -> 在每个已选模块入口内有限发现页面、数据库或选项卡内容
   -> 发现实际数据库和 Data Source
   -> 读取实时 Schema
@@ -47,14 +47,14 @@ description: "初始化、重新绑定、健康检查并为其他 Skill 提供�
 
 ## 初始化流程
 
-### 1. 确认已购模块与入口链接
+### 1. 确认模块与入口链接
 
 1. 使用当前环境已连接的 Notion 工具确认工作区和只读能力。
-2. 先询问用户要连接哪些已购模块：成长系统、商业系统、生活系统。允许选择任意一个、任意两个或三个；“三合一”是三项全选的快捷选项。不要默认用户购买了全部模块。
+2. 先确认用户要连接成长系统、生活系统，还是同时连接两者。
 3. 让用户发送所选模块对应的 Notion 页面链接。可以逐个给不同页面，也可以说明多个模块都在同一个 Hub/总页面中并只提供该页面一次。若用户只提供一个页面但没有说明它代表哪些模块，先询问关联模块，不要猜。
 4. 读取每个已选入口以确认页面身份和可读状态。入口不能读取时，保留其他可读模块并报告具体受影响的模块；所有已选入口都不可读时停止。
 
-历史单 Hub 配置继续可读。重新初始化或重新绑定时仍应询问模块选择；用户明确确认旧 Hub 为三合一后，才将三个模块都列入选择。
+已有配置可以继续为成长与生活 Skill 提供索引。重新初始化或重新绑定时，按用户确认的成长或生活入口建立索引。即使共享 Hub 还有其他模块，也只展开已选模块对应的页面或选项卡。
 
 ### 2. 动态发现
 
@@ -83,7 +83,7 @@ python3 scripts/validate_config.py --config-dir <本地状态目录>
 
 生成器负责去重、结构指纹、查找表、字段访问判断、语义映射、报告、备份和原子替换。不要手工拼接最终 JSON。
 
-语义别名只是查找捷径，不是模板契约：只有实际匹配的概念才进入 `semantic-map.json`。普通页面可映射为 `kind: page`，例如 `commercial_positioning` 指向用户自己的《商业定位》；`待办` 可以映射到字段选项，`专注` 可以映射到多个数据库字段；它们不得被假设为独立数据库。
+语义别名只是查找捷径，不是模板契约：只有实际匹配的概念才进入 `semantic-map.json`。普通页面可映射为 `kind: page`，例如 `life_positioning` 指向用户自己的《愿景定位》；`待办` 可以映射到字段选项，`专注` 可以映射到多个数据库字段；它们不得被假设为独立数据库。
 
 ### 5. 只读冒烟测试
 
@@ -122,8 +122,8 @@ python3 scripts/validate_config.py --config-dir <本地状态目录>
 ```bash
 python3 scripts/runtime.py status
 python3 scripts/runtime.py resolve --concept task
-python3 scripts/runtime.py resolve --concept commercial_positioning
-python3 scripts/runtime.py resolve --page 商业定位
+python3 scripts/runtime.py resolve --concept life_positioning
+python3 scripts/runtime.py resolve --page 愿景定位
 python3 scripts/runtime.py resolve --source 任务
 python3 scripts/runtime.py resolve --property 专注
 ```

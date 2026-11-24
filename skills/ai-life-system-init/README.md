@@ -1,8 +1,8 @@
 # AI 人生系统底座 Skill
 
-版本：`1.2.0`
+版本 `1.3.0`
 
-一个 Skill 同时完成两件事：首次读取学员自己的 Notion 模板，有限发现三个系统入口的直接子页面并建立本地动态索引；为目标、任务、复盘、商业定位等具体 Skill 提供统一的目标解析和写入前校验。不需要再安装单独的 `notion-life-system`。
+一个 Skill 同时完成两件事：首次读取学员自己的 Notion 模板，在所选成长或生活入口中发现可用页面与数据库，为目标、任务、复盘等 Skill 提供统一的 Notion 定位和写入前校验。不需要再安装单独的 `notion-life-system`。
 
 发布包不会包含任何学员的 Notion 数据、数据库 ID 或个人记录。
 
@@ -24,7 +24,7 @@
 
 ## 使用
 
-先确保 Codex 已连接 Notion。初始化会先询问学员购买并要接入哪些模块（成长系统、商业系统、生活系统，可选任意一个、两个或三个），然后让其提供相应页面链接。多个模块可以共用一个 Hub，也可以各自提供入口页面。然后输入：
+先确保 Codex 已连接 Notion。初始化会先询问学员要接入成长系统、生活系统还是两者，然后请学员提供相应页面链接。多个模块可以共用一个 Hub，也可以各自提供入口页面。然后输入：
 
 ```text
 $ai-life-system-init
@@ -41,7 +41,7 @@ $ai-life-system-init
 ```text
 python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py status
 python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept task
-python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept commercial_positioning
+python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept life_positioning
 ```
 
 数据库写入前调用 `check-write` 校验真实 Data Source、字段和选项；普通页面正文更新前调用 `check-page-write` 校验页面身份。Runtime 只做结构解析与本地预检，不会替业务 Skill 写入 Notion，也不代表用户已经授权。
@@ -63,7 +63,7 @@ python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept
 ## 设计特点
 
 - 以学员当前 Notion 页面为事实来源，不要求所有人使用完全相同的数据库名称。
-- 只展开成长、商业、生活系统入口的直接子页面，不递归扫描整个工作区。
+- 发现范围限于所选成长和生活系统入口及其直接子页面。
 - “待办”可以是字段选项，“专注”可以出现在多个数据库字段中，不会被误判成独立数据库。
 - 初始化与业务动作分离：初始化只建立索引；Runtime 负责结构解析和预检；具体 Skill 负责业务逻辑与获得授权后的实际动作。
 - 如果模板发生变化，可以重新运行 Skill；旧本地配置会自动备份。

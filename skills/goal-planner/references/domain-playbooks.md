@@ -107,7 +107,6 @@ Evidence to check:
 
 - existing content records
 - content performance if available
-- commercial positioning/project memory if the goal is monetization-oriented
 - review notes about creation blockers
 
 Planning rules:
@@ -182,52 +181,7 @@ Common mistakes:
 - no review of mistakes
 - spreading across too many materials
 
-## 5. Business / Monetization / Productized Service
-
-Use for goals like:
-
-- 商业化
-- 产品设计
-- 咨询服务
-- 私域转化
-- 模板/课程/MVP
-
-Evidence to check:
-
-- commercial positioning memory if available
-- current products/services
-- content and audience feedback
-- sales/revenue records if available
-- project/review notes
-
-Planning rules:
-
-- Define customer, problem, offer, proof, and channel.
-- Validate before overbuilding.
-- Keep first offer small and testable.
-- Separate asset creation from market contact.
-
-Project examples:
-
-- 设计一个 99 元诊断服务
-- 完成 5 次用户访谈
-- 发布一页服务说明
-- 整理 3 个案例证明
-
-Habit examples:
-
-- 每周联系 5 个潜在用户
-- 每周发布 2 条问题洞察内容
-- 每周复盘转化反馈
-
-Common mistakes:
-
-- building a full product before validation
-- vague target user
-- only polishing copy, not talking to users
-- no proof or case evidence
-
-## 6. General Domain Fallback
+## 5. General Domain Fallback
 
 If the domain is not covered:
 

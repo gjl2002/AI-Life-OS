@@ -4,7 +4,7 @@
 
 ## profile.json
 
-保存配置格式、工作区、已选模块、每个模块的入口、已匹配语义摘要和各索引文件名。`hub` 为旧版兼容摘要；新配置以 `selected_modules` 和 `module_roots` 为准。健康状态使用：
+保存配置格式、工作区、已选模块、各模块入口和发现完整度、已匹配语义摘要和各索引文件名。`hub` 为旧版兼容摘要；新配置以 `selected_modules` 和 `module_roots` 为准。健康状态使用：
 
 - `ready`：至少一个已选入口与至少一个 Schema 可读，且没有真实读取或冒烟测试故障；
 - `needs_attention`：部分成功，但有模块入口、Data Source 读取失败或只读冒烟测试失败；
@@ -19,7 +19,7 @@
 - `discovery.json`：原始发现证据；
 - `notion-index.json`：事实索引和 lookup；
 - `semantic-map.json`：只包含实际匹配概念；
-- `dimension-pages.json`：系统入口及其直接子页面的结构身份，不保存正文；
+- `dimension-pages.json`：已选模块入口及其实际子页面的结构身份与发现完整度；
 - `initialization-report.md`：实际结构与真实故障摘要。
 
 `notion-schema.json` 和 `routing-rules.json` 是旧版兼容文件。新 Skill 必须先读取 `profile.json`，再使用其中的 `source_index_file` 与 `semantic_map_file`。

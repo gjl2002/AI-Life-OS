@@ -13,7 +13,7 @@ from typing import Any, Optional
 from build_config import canonical_notion_id, normalize_text
 
 
-RUNTIME_VERSION = "1.3.0"
+RUNTIME_VERSION = "1.4.0"
 
 
 class RuntimeConfigError(ValueError):
@@ -122,6 +122,7 @@ def runtime_page_reference(page: dict[str, Any]) -> dict[str, Any]:
         "parent_page_id": page.get("parent_page_id", ""),
         "parent_key": page.get("parent_key", ""),
         "depth": page.get("depth", 1),
+        "discovery_complete": bool(page.get("discovery_complete", True)),
         "read_ready": bool(page.get("readable", False)),
     }
 

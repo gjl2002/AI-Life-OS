@@ -29,6 +29,8 @@
 
 `workspace.id` 在连接工具不暴露时可以为空，但 `workspace.name`、`selected_modules`、`module_roots` 中每个 `page_id` 与 `readable` 必须来自真实读取结果。新建发现文件的 `module_key` 使用 `growth` 或 `life`。`entry_kind` 使用 `module_page` 或 `shared_hub`。同一个共享 Hub 可为每个选中的模块建立一项入口，并通过该模块选项卡确定扫描范围。旧版只提供 `hub` 的文件仍可读取。重新绑定时须显式记录用户选择的成长或生活模块。
 
+入口和普通页面的 `discovery_complete` 为可选布尔值。遇到分页、截断或无法确认子页面时填 `false`，并用 `discovery_error` 记录原因。旧格式缺省按原先的可读范围处理。
+
 ## 候选数据库
 
 ```json
@@ -58,6 +60,8 @@
 同一个规范化 Notion ID 只保留一个候选；合并时保留最明确的来源和全部检测说明。`selected` 默认为 `true`，显式为 `false` 的候选只进入发现索引，不进入路由配置。
 
 生成器兼容读取旧版 `0.2`、`0.3` 发现文件以及只含单个 `hub` 的 `0.4` 文件。输出使用当前 `0.4` 格式并附带模块选择和入口元数据。
+
+已保存视图提供来源线索。确认数据源所属的原始数据库后再登记该容器，并保留视图引用。多个视图引用相同源时只登记一次，数据源 ID 重复登记于不同容器时生成器会拒绝生成索引。
 
 ## Data Source 与属性
 
@@ -96,7 +100,7 @@
 
 ## 非数据库页面
 
-`dimension_pages` 保存 Hub 直接普通页面，以及已选成长与生活系统入口的直接子页面。初始化只采集结构元数据，不保存页面正文：
+`dimension_pages` 保存 Hub 直接普通页面，以及已选成长与生活系统入口内发现的实际子页面。初始化只采集结构元数据，不保存页面正文：
 
 ```json
 {
@@ -110,11 +114,13 @@
   "depth": 1,
   "last_edited_time": "2026-08-22T01:00:00.000Z",
   "detection_reason": "Hub 直接页面",
-  "readable": true
+  "readable": true,
+  "discovery_complete": true,
+  "discovery_error": ""
 }
 ```
 
-Hub 为 `depth: 0`，已选成长或生活系统入口为 `depth: 1`，这些入口的直接子页面为 `depth: 2`。到 `depth: 2` 后停止，不继续递归普通子页面。`user_override.capability` 可以把用户确认的页面绑定到稳定 page concept，例如 `life_positioning`。
+共享 Hub 为 `depth: 0`，按实际子页面路径记录非负整数深度。独立模块入口可作为该发现树的深度 0。递归范围限于已选模块。多个发现路径保留最短路径。`user_override.capability` 可以把用户确认的页面绑定到稳定 page concept，例如 `life_positioning`。
 
 ## 冒烟测试
 

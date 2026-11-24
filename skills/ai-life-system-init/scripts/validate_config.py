@@ -107,8 +107,10 @@ def validate(config_dir: Path) -> list[str]:
         if not isinstance(page.get("readable"), bool):
             errors.append(f"普通页面 readable 必须是布尔值：{page_id}")
         depth = page.get("depth")
-        if not isinstance(depth, int) or depth < 0 or depth > 2:
-            errors.append(f"普通页面 depth 必须是 0 到 2 的整数：{page_id}")
+        if not isinstance(depth, int) or depth < 0:
+            errors.append(f"普通页面 depth 必须为非负整数：{page_id}")
+        if not isinstance(page.get("discovery_complete", True), bool):
+            errors.append(f"普通页面 discovery_complete 必须是布尔值：{page_id}")
 
     lookup = index.get("lookup")
     if not isinstance(lookup, dict):
@@ -162,6 +164,8 @@ def validate(config_dir: Path) -> list[str]:
                 errors.append("profile.json module_roots 包含未选择模块")
             if not isinstance(root.get("readable"), bool):
                 errors.append("profile.json module_roots.readable 必须为布尔值")
+            if not isinstance(root.get("discovery_complete", True), bool):
+                errors.append("profile.json module_roots.discovery_complete 必须为布尔值")
     health = profile.get("health") if isinstance(profile.get("health"), dict) else {}
     if health.get("status") not in {"ready", "needs_attention", "blocked"}:
         errors.append("profile.json health.status 无效")

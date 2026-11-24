@@ -44,7 +44,7 @@ python3 scripts/runtime.py resolve --option 待办
 
 名称查询使用 NFKC、转小写和移除常见分隔符后的精确匹配，不做模糊标题猜测。优先使用稳定 concept key；语义不存在时，再查询 page、source、property 或 option。
 
-page 目标来自初始化时有限发现并写入 `dimension-pages.json` 的普通页面。Runtime 返回页面身份，不返回页面正文；具体 Skill 必须再从 Notion 读取实时内容。
+page 目标来自初始化时有限发现并写入 `dimension-pages.json` 的实际子页面。Runtime 返回页面身份和发现完整度，不返回页面正文；具体 Skill 必须再从 Notion 读取实时内容。
 
 ## check-write
 

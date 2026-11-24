@@ -1,4 +1,4 @@
 interface:
   display_name: "AI人生系统底座"
-  short_description: "初始化Notion模板并解析数据库与核心普通页面"
+  short_description: "为成长与生活模块递归建立 Notion 页面和数据库索引"
   default_prompt: "请使用 $ai-life-system-init 初始化或检查我的 AI 人生系统；若已经初始化，请使用 Runtime 解析真实 Notion 结构。"

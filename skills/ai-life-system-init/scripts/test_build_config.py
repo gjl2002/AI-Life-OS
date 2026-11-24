@@ -212,17 +212,58 @@ class BuildConfigTest(unittest.TestCase):
         self.assertEqual("multiple", concept["status"])
         self.assertEqual(2, len([page for page in pages if page["title"] == "商业定位"]))
 
-    def test_rejects_page_discovery_beyond_bounded_depth(self):
+    def test_selected_module_can_index_deep_pages_and_report_incomplete_discovery(self):
         raw = self.discovery()
+        raw["selected_modules"] = ["growth"]
         raw["dimension_pages"].append({
-            "key": "too_deep",
-            "title": "不应继续扫描的页面",
+            "title": "深层子页面",
             "page_id": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "depth": 3,
+            "source": "module_descendant",
+            "depth": 5,
             "readable": True,
+            "discovery_complete": False,
+            "discovery_error": "分页未返回",
         })
-        with self.assertRaises(build_config.ConfigError):
+        outputs = self.outputs(raw)
+        profile = json.loads(outputs["profile.json"])
+        self.assertEqual(["growth"], profile["selected_modules"])
+        self.assertEqual("needs_attention", profile["health"]["status"])
+        self.assertIn("深层子页面：分页未返回", outputs["initialization-report.md"])
+        pages = json.loads(outputs["dimension-pages.json"])["pages"]
+        nested = next(page for page in pages if page["title"] == "深层子页面")
+        self.assertEqual(5, nested["depth"])
+        self.assertFalse(nested["discovery_complete"])
+        with tempfile.TemporaryDirectory() as temp:
+            config_dir = Path(temp)
+            build_config.transactional_write(config_dir, outputs)
+            self.assertEqual([], validate_config.validate(config_dir))
+
+    def test_rejects_source_registered_under_view_and_original_database(self):
+        raw = self.discovery()
+        raw["candidates"].append(candidate(
+            "abababababababababababababababab",
+            "任务视图",
+            "首页",
+            data_sources=[{"id": raw["candidates"][2]["database_id"], "title": "任务"}],
+        ))
+        with self.assertRaisesRegex(build_config.ConfigError, "重复登记"):
+            self.outputs(raw)
+
+    def test_rejects_candidates_declared_outside_selected_modules(self):
+        raw = self.discovery()
+        raw["selected_modules"] = ["growth"]
+        raw["candidates"][0]["module_keys"] = ["commercial"]
+        with self.assertRaisesRegex(build_config.ConfigError, "未选择的模块"):
             build_config.normalize_discovery(raw)
+
+    def test_reports_truncation_on_selected_shared_hub_entry(self):
+        raw = self.discovery()
+        raw["selected_modules"] = ["life"]
+        raw["hub"].update(discovery_complete=False, discovery_error="选项卡未完整返回")
+        outputs = self.outputs(raw)
+        profile = json.loads(outputs["profile.json"])
+        self.assertEqual("needs_attention", profile["health"]["status"])
+        self.assertIn("选项卡未完整返回", outputs["initialization-report.md"])
 
     def test_transaction_and_cross_file_validation(self):
         outputs = self.outputs()

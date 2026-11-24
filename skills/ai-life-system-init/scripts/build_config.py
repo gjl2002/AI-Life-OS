@@ -219,8 +219,8 @@ def normalize_dimension_page(raw: dict[str, Any]) -> dict[str, Any]:
         depth = int(depth_raw)
     except (TypeError, ValueError) as exc:
         raise ConfigError(f"非数据库页面 depth 无效：{depth_raw}") from exc
-    if depth < 0 or depth > 2:
-        raise ConfigError(f"非数据库页面 depth 必须在 0 到 2 之间：{depth}")
+    if depth < 0:
+        raise ConfigError(f"非数据库页面 depth 不能小于 0：{depth}")
     title = str(raw.get("title") or "未命名页面")
     return {
         "key": str(raw.get("key") or normalize_text(title) or "page"),
@@ -234,6 +234,8 @@ def normalize_dimension_page(raw: dict[str, Any]) -> dict[str, Any]:
         "depth": depth,
         "detection_reason": str(raw.get("detection_reason") or ""),
         "readable": bool(raw.get("readable", True)),
+        "discovery_complete": bool(raw.get("discovery_complete", True)),
+        "discovery_error": str(raw.get("discovery_error") or ""),
         "user_override": copy.deepcopy(raw.get("user_override", {})) if isinstance(raw.get("user_override"), dict) else {},
     }
 
@@ -251,6 +253,9 @@ def merge_dimension_page(existing: dict[str, Any], incoming: dict[str, Any]) -> 
             merged[key] = incoming[key]
     merged["depth"] = min(existing_depth, incoming_depth)
     merged["readable"] = bool(existing.get("readable") or incoming.get("readable"))
+    merged["discovery_complete"] = existing["discovery_complete"] and incoming["discovery_complete"]
+    errors = [value for value in (existing["discovery_error"], incoming["discovery_error"]) if value]
+    merged["discovery_error"] = "；".join(dict.fromkeys(errors))
     if incoming.get("user_override"):
         merged["user_override"] = incoming["user_override"]
     sources = []
@@ -285,6 +290,8 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
             "url": str(item.get("url") or ""),
             "last_edited_time": str(item.get("last_edited_time") or ""),
             "readable": bool(item.get("readable")),
+            "discovery_complete": bool(item.get("discovery_complete", True)),
+            "discovery_error": str(item.get("discovery_error") or ""),
         })
     selected = raw.get("selected_modules")
     if isinstance(selected, list):
@@ -309,6 +316,8 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
             "url": str(hub.get("url") or ""),
             "last_edited_time": str(hub.get("last_edited_time") or ""),
             "readable": bool(hub.get("readable")),
+            "discovery_complete": bool(hub.get("discovery_complete", True)),
+            "discovery_error": str(hub.get("discovery_error") or ""),
         } for module in selected_modules]
     if any(root["module_key"] not in selected_modules for root in roots):
         raise ConfigError("module_roots 不能包含未选择的模块")
@@ -321,6 +330,8 @@ def normalize_discovery(raw: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(item, dict):
             continue
         candidate = normalize_candidate(item)
+        if set(candidate["module_keys"]) - set(selected_modules):
+            raise ConfigError(f"{candidate['title']} 的来源包含未选择的模块")
         current = by_id.get(candidate["database_id"])
         by_id[candidate["database_id"]] = merge_candidate(current, candidate) if current else candidate
 
@@ -402,10 +413,14 @@ def normalize_semantics(semantics: dict[str, Any]) -> list[dict[str, Any]]:
 
 def schema_sources(discovery: dict[str, Any], generated_at: str) -> list[dict[str, Any]]:
     result = []
+    seen_source_ids: set[str] = set()
     for candidate in discovery["candidates"]:
         if not candidate["selected"]:
             continue
         for source in candidate["data_sources"]:
+            if source["id"] in seen_source_ids:
+                raise ConfigError(f"Data Source {source['id']} 被重复登记，请按真实所属数据库合并页面树与视图引用")
+            seen_source_ids.add(source["id"])
             properties = source["properties"]
             relations = []
             for prop in properties:
@@ -509,6 +524,7 @@ def page_reference(page: dict[str, Any]) -> dict[str, Any]:
         "parent_page_id": page["parent_page_id"],
         "parent_key": page["parent_key"],
         "depth": page["depth"],
+        "discovery_complete": page["discovery_complete"],
         "read_ready": page["readable"],
     }
 
@@ -659,7 +675,13 @@ def overall_health(discovery: dict[str, Any], sources: list[dict[str, Any]], pag
     unreadable_pages = [page for page in pages if not page["readable"]]
     if unreadable_pages:
         warnings.append(f"{len(unreadable_pages)} 个普通页面不可读取")
-    return ("needs_attention" if failed_roots or failed_sources or failed_smoke or unreadable_pages else "ready"), warnings
+    incomplete = [node for node in discovery["module_roots"] + pages if not node["discovery_complete"]]
+    for node in incomplete:
+        detail = node["discovery_error"] or "子页面或数据库引用未能完整发现"
+        path = " → ".join(filter(None, [node.get("parent_key") or node.get("module_key"), node["title"]]))
+        warnings.append(f"{path}：{detail}")
+    needs_attention = failed_roots or failed_sources or failed_smoke or unreadable_pages or incomplete
+    return ("needs_attention" if needs_attention else "ready"), warnings
 
 
 def render_report(

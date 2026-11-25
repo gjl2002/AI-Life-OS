@@ -4,21 +4,23 @@
 
 AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 28 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
 
+## 初始化
+
+`ai-life-system-init`：初始化、重新绑定、健康检查和 Runtime 索引。
+
 ## AI 工作入口
 
-瑶妹（`ai-coach`）是成长与生活系统的入口。你可以请她厘清方向、续接上次行动或安排本周重点，也可以直接交代一件生活事务。
+（`ai-coach`）是成长与生活系统的入口。你可以请她厘清方向、续接上次行动或安排本周重点，也可以直接交代一件生活事务。
 
 ## 成长系统
 
-1. `ai-life-system-init`：初始化、重新绑定、健康检查和 Runtime 索引。
-2. `life-positioning-coach`：人生定位教练。
-3. `goal-planner`：目标教练。
-4. `boss-image-sync`：按目标主题色评估和匹配游戏化 Boss 图；用户确认后更新。
-5. `question-clarification-coach`：问题澄清教练。
-6. `question-synthesis-coach`：问题综合教练。
-7. `stuck-point-insight-coach`：卡点洞察教练。
-8. `information-source-daily-briefing`：信息源日报。
-9. `sop-builder`：SOP 构建。
+1. `life-positioning-coach`：人生定位教练。
+2. `goal-planner`：目标教练。
+3. `question-clarification-coach`：问题澄清教练。
+4. `question-synthesis-coach`：问题综合教练。
+5. `stuck-point-insight-coach`：卡点洞察教练。
+6. `information-source-daily-briefing`：信息源日报。
+7. `sop-builder`：SOP 构建。
 
 ## 生活系统
 
@@ -61,6 +63,8 @@ AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手�
 | `task-tracker` | 记录任务和待办、日期、目的与背景，并匹配已有项目。也可从截图提取任务。 | “帮我记下明天下午去取快递。” |
 | `expense-tracker` | 记录支出、收入、账户转账、订阅和报销，并在你的财务结构支持时关联分类或报表。 | “午饭 38 元，记一笔。” |
 | `season-sync` | 将个人 12 周赛季与选定的游戏、体育或活动赛季对齐，核实官方赛季名与海报后更新自己的复盘记录。 | “把这轮 12 周赛季同步到王者荣耀最新正式服赛季。” |
+
+`boss-image-sync`：按目标主题色评估和匹配游戏化 Boss 图；用户确认后更新。
 
 这些 Skills 使用你自己连接的 Notion 结构。若无法确认目标数据库或字段，Skill 会先提醒你，不会套用发布者的页面或个人记录。身体、财务和情绪等信息由你决定是否记录。
 

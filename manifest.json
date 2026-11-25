@@ -1,9 +1,9 @@
 {
   "suite_name": "ai-life-os-skill-suite",
-  "suite_version": "3.1.0",
-  "published_at": "2026-11-24",
+  "suite_version": "3.2.0",
+  "published_at": "2026-11-25",
   "entry_skill": "ai-life-system-init",
-  "install_target": "~/.codex/skills/",
+  "skill_source": "skills/",
   "life_system_skills": [
     "ai-life-system-init",
     "life-positioning-coach",

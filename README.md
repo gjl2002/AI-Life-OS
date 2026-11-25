@@ -1,6 +1,6 @@
 # AI Life OS Skill 套件
 
-版本 `3.1.0`
+版本 `3.2.0`
 
 AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 28 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
 
@@ -64,39 +64,44 @@ AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手�
 
 这些 Skills 使用你自己连接的 Notion 结构。若无法确认目标数据库或字段，Skill 会先提醒你，不会套用发布者的页面或个人记录。身体、财务和情绪等信息由你决定是否记录。
 
-## 安装
+## 选择你的 Agent
 
-本仓库只发布 Skill 文件，不包含任何 Notion 数据库、页面内容或个人配置。学员可以直接执行下面两条命令：
+先[下载仓库 ZIP](https://github.com/gjl2002/AI-Life-OS/archive/refs/heads/main.zip)并解压，或用 Git 克隆。每个 Skill 都在 `skills/<名称>/` 下，包含 `SKILL.md` 和所需的脚本及参考文件。按你的 Agent 支持的方式导入整个 Skill 包。
+
+| 平台 | 安装方法 |
+|---|---|
+| WorkBuddy | 在技能页选择添加并上传本地技能包，每次选择一个 Skill 的 ZIP。[腾讯官方指引](https://www.tencentcloud.com/zh/document/product/1316/84503) |
+| 豆包工作 | 在桌面客户端的技能管理中导入本地技能文件。可用时上传单个 Skill 的 ZIP。具体入口以客户端版本和账号权限为准。[豆包工作官方说明](https://www.feishu.cn/content/article/7677519271848610746) |
+| DeepSeek Harness | 将完整 Skill 文件夹放到当前 Harness 会扫描的目录，例如默认配置下的 `~/.dsh/skills/`。需要启用文件系统 Skill provider。[DeepSeek 官方文档](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md) |
+| Codex | 在仓库目录运行 `./install.sh --codex`。脚本使用 Codex 的用户 Skill 目录。 |
+| 其他支持 Agent Skills 的平台 | 使用客户端的导入入口，或将 Skill 文件夹复制到平台文档指定的目录。[Agent Skills 规范](https://agentskills.io/specification) |
+
+### 本地安装和打包命令
+
+在解压后的仓库目录用 Bash 运行对应命令。通过 Finder 或资源管理器手动导入时，保留整个 Skill 文件夹和它的子目录。需要上传 ZIP 时，把单个 Skill 文件夹的**内部文件**压缩在一起，使 `SKILL.md` 位于 ZIP 根目录。
 
 ```bash
-git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
-"$HOME/.ai-life-os/install.sh"
+# 安装到你指定的目录，例如 DeepSeek Harness 的用户技能目录
+./install.sh --skills-dir "${DSH_HOME:-$HOME/.dsh}/skills"
+
+# 明确选择 Codex
+./install.sh --codex
+
+# 批量生成单个 Skill 的 ZIP，供客户端逐个上传（需要 Python 3）
+./install.sh --zip-dir ./skill-zips
 ```
 
-安装脚本会将 28 个 Skill 复制到当前用户的目录。
-
-```text
-~/.codex/skills/
-```
-
-如果已经下载仓库，也可以在仓库目录运行：
-
-```bash
-./install.sh
-```
-
-复制完成后重新打开 Codex，或新建一个任务。
+`./install.sh --help` 可以查看选项。目录安装和 ZIP 导出均按你明确选择的目标执行。
 
 ## 首次使用
 
-安装本身不需要 Notion。需要使用 Notion-backed 能力时：
+想试用对话教练时，在 Agent 的技能列表中选择 `ai-coach`，或发「请使用 ai-coach，帮我梳理本周重点」。按需同时安装它会调用的专长 Skill。
 
-1. 在 Codex 中连接学员自己的 Notion。
-2. 运行 `$ai-life-system-init`，选择成长系统、生活系统或两者，并提供对应的 Notion 页面链接。两个模块可以各用独立页面，也可以共用一个 Hub。初始化会沿所选模块的实际子页面建立数据源索引。
-3. 确保所选页面已分享给当前 Notion 连接，完成初始化。
-4. 初始化成功后，可以从 `$ai-coach` 开始，也可以直接调用需要的成长或生活 Skill。
+需要 **Notion 查询、记录或写回**时，当前 Agent 还需要能调用用户已授权的 Notion 连接，运行 Python 3 并读写自己的运行时索引。具体网页采集、文件上传等功能还取决于该平台暴露的工具。成功导入包只说明 Skill 可加载，实际执行要看这些能力。
 
-初始化生成的个人配置默认位于 `~/.ai-life-system/`。该目录只属于当前学员，不应上传、分享或放回课程套件。
+1. 在当前 Agent 中连接自己的 Notion，确认已分享要接入的成长或生活页面。
+2. 使用平台的技能入口调用 `ai-life-system-init`，提供所选模块的 Notion 页面链接。两个模块可以各用独立页面，也可以共用一个 Hub。初始化会沿所选模块的实际子页面建立数据源索引。
+3. 初始化成功后再使用需要 Notion 的 Skill，例如 `task-tracker`。脚本生成的个人配置默认位于 `~/.ai-life-system/`，由使用者自己保管。
 
 ## 数据边界
 
@@ -107,6 +112,6 @@ git clone https://github.com/gjl2002/AI-Life-OS.git "$HOME/.ai-life-os"
 
 ## 更新
 
-在仓库目录运行 `git pull --ff-only` 和 `./install.sh`，然后重新打开 Codex。从 3.0.0 升级后，如需索引深层页面里的数据库，请重新运行 `$ai-life-system-init`。以后模板结构发生变化时可以按同样方式重新绑定。
+已克隆仓库时，在仓库目录运行 `git pull --ff-only`，再重复你的平台安装命令。通过客户端下载或上传时，下载新版本并重新导入所用的 Skill。升级到新版初始化底座后，如需索引深层页面里的数据库，请重新运行 `ai-life-system-init`。
 
-从 2.5.0 升级时，安装脚本只覆盖本版本提供的 Skill。若希望从 Codex 中移除旧版附带的商业 Skill，请到原安装目录手动清理。
+从 2.5.0 升级的用户，可以在原安装目录手动清理旧版附带的商业 Skill。

@@ -7,7 +7,7 @@ description: Use when the user wants the Chinese "目标教练" to design, clari
 
 ## Purpose
 
-Run the Codex version of the user's `目标教练`: a structured quarterly goal coach that helps the user move from "我想推进一个方向" to a clear goal, concrete projects, supportive habits, and first-week actions.
+Use `目标教练` as a structured quarterly goal coach that helps the user move from "我想推进一个方向" to a clear goal, concrete projects, supportive habits, and first-week actions.
 
 Positioning sentence:
 

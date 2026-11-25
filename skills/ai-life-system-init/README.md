@@ -8,45 +8,27 @@
 
 ## 安装
 
-解压后，将整个 `ai-life-system-init` 文件夹放到：
-
-```text
-~/.codex/skills/
-```
-
-最终目录应为：
-
-```text
-~/.codex/skills/ai-life-system-init/SKILL.md
-```
-
-然后重新打开 Codex 或新建一个对话。
+按[套件的多平台安装说明](https://github.com/gjl2002/AI-Life-OS#选择你的-agent)导入完整的 `ai-life-system-init` 文件夹或单 Skill ZIP，保留 `scripts/` 和 `references/`。供其他 Skill 调用时，确认当前 Agent 能访问该包实际所在目录。
 
 ## 使用
 
-先确保 Codex 已连接 Notion。初始化会先询问学员要接入成长系统、生活系统还是两者，然后请学员提供相应页面链接。多个模块可以共用一个 Hub，也可以各自提供入口页面。然后输入：
+确认当前 Agent 能读取你授权的 Notion 页面和 Data Source，能运行 Python 3，并允许在你的环境中建立本地索引。通过平台的技能入口调用 `ai-life-system-init`，或发「请使用 ai-life-system-init 初始化我的 AI 人生系统」。
 
-```text
-$ai-life-system-init
-```
-
-系统从已选模块入口沿实际子页面递归发现。共享 Hub 只展开已确认的模块入口。
-
-初始化只读 Notion，不会创建、修改、移动或删除页面和数据库记录。
+选择成长系统、生活系统或两者，并提供对应的 Notion 页面链接。多个模块可共用一个 Hub。系统沿已选模块的实际子页面递归发现，以只读方式核验 Notion 结构。
 
 ## 其他 Skill 如何接入
 
-具体 Skill 先调用本包中的 Runtime：
+在 `ai-life-system-init` 实际安装目录中运行 Runtime。
 
 ```text
-python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py status
-python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept task
-python3 ~/.codex/skills/ai-life-system-init/scripts/runtime.py resolve --concept life_positioning
+python3 scripts/runtime.py status
+python3 scripts/runtime.py resolve --concept task
+python3 scripts/runtime.py resolve --concept life_positioning
 ```
 
 数据库写入前调用 `check-write` 校验真实 Data Source、字段和选项；普通页面正文更新前调用 `check-page-write` 校验页面身份。Runtime 只做结构解析与本地预检，不会替业务 Skill 写入 Notion，也不代表用户已经授权。
 
-学员只需运行一次 `$ai-life-system-init`。以后模板发生变化时重新运行，所有接入它的具体 Skill 会读取新索引，无需逐个重新配置。
+在同一运行环境完成一次初始化后，其他 Skill 可以共享这份索引。以后模板发生变化时重新运行，所有接入它的具体 Skill 会读取新索引，无需逐个重新配置。
 
 ## 生成的本地文件
 

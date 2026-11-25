@@ -1,6 +1,6 @@
 ---
 name: information-source-daily-briefing
-description: Create a Chinese daily briefing exclusively from sources the user has marked as followed in a connected cloud Notion information-source database, and write the report to the user's Notion daily-report database by default. Use when the user asks for 信息源日报, 我的关注源日报, 关注源摘要, Notion 信息源早报, or a recurring briefing that reads the user's own selected sources. Verify recent timestamps and links, disclose unreadable sources, never add unlisted public, official, trending, or paper sources, and skip Notion writeback only when the user explicitly asks for preview-only output.
+description: Create a Chinese daily briefing exclusively from sources the user has marked as followed in a connected cloud Notion information-source database, and write the report to the user's shared Notion 日报 data source with 标签 = 日报 by default. Use when the user asks for 信息源日报, 我的关注源日报, 关注源摘要, Notion 信息源早报, or a recurring briefing that reads the user's own selected sources. Verify recent timestamps and links, disclose unreadable sources, never add unlisted public, official, trending, or paper sources, and skip Notion writeback only when the user explicitly asks for preview-only output.
 ---
 
 # 信息源日报
@@ -22,16 +22,16 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 ## Data Boundary
 
 - 云端 Notion 是唯一的个人数据来源。
-- 默认运行需要用户自己的`信息源`和`信息日报`数据库；首次运行未提供准确链接时先请求两个数据库链接。只有明确要求仅预览时，才只要求`信息源`。
+- 默认运行需要用户自己的「信息源」和已确认的共享「日报」数据源。需要消歧时才请求准确链接。仅预览只需定位「信息源」。
 - 不读取本地 Notion Sync、Markdown 导出、数据库索引或固定个人目录。
 - 不读取商业定位、人生系统或其他个人数据库，除非用户在本次请求中主动提供一段关注重点。
-- 不使用硬编码的页面 ID、数据库 ID、字段名或个人路径。
+- 使用当前用户的实时数据库结构和连接权限。写回所需的「标签」及选项「日报」均须通过实时 Schema 核验。
 - 不自动加入 OpenAI、Anthropic、新闻网站、热门榜单、GitHub、论文或任何未被用户关注的来源。
 - 可以沿着关注源给出的原始链接或引用链接核实事实，但不能因此把新来源加入日报候选池。
 
 ## AI 人生系统索引
 
-正式运行时先调用 `$ai-life-system-init` 的 `scripts/runtime.py status`。用 `resolve --concept information_source` 定位真实`信息源`数据源；用 `resolve --source 信息日报`定位日报数据源。可选概念库只有用户已启用时才按真实名称解析。
+正式运行时先调用 `$ai-life-system-init` 的 `scripts/runtime.py status`。用 `resolve --concept information_source` 定位真实`信息源`数据源；用 `resolve --concept daily_report` 定位共享「日报」。语义未识别时可用 `resolve --source 日报` 精确查找。首次写入须由用户确认目标数据源。可选概念库只有用户已启用时才按真实名称解析。
 
 - `needs_init`：引导用户先运行 `$ai-life-system-init`，不回退固定 ID，也不要求学员重新配置数据库清单。
 - `multiple`：不静默取第一个；根据用户链接或已确认自动化配置消歧。
@@ -43,7 +43,7 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 
 默认按`写入日报`模式运行：
 
-- `写入日报`：普通调用和自动日报都在生成后写入用户指定的云端`信息日报`数据库，并完成回读验证。
+- `写入日报`：普通调用和自动日报都在生成后写入用户确认的共享「日报」，设置 `标签 = 日报` 并回读。
 - `仅预览`：只有用户明确说“只预览”“不要写入”或语义等价表达时，才只在对话中交付 Markdown。
 
 概念库始终是可选能力。只有用户已提供概念库、明确启用概念沉淀，并且当天出现合格概念时才写入。
@@ -60,15 +60,9 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 
 ### 2. Verify Source Coverage
 
-逐个检查关注源在时间窗口内是否有可验证的新内容。优先使用 RSS/Atom 或来源提供的稳定订阅地址，再使用原始网页、频道页或公开接口。
+逐个核验正在关注且已启用的来源。先保留来自实时查询的完整关注名单，再按运行手册为每个来源记录覆盖状态、证据和失败原因。优先使用该源的 RSS、订阅页、原始页面或公开接口，遇到临时失败时按手册重试或走同一来源的备用入口。
 
-为每个来源保留一种覆盖状态：
-
-- `有已验证更新`
-- `已验证暂无更新`
-- `未能验证`
-
-读取失败、反爬、网络错误或只有旧缓存时写成`未能验证`，不能写成`无新增`。若全部关注源都无法进行当前验证，停止生成日报；若只有部分失败，继续并公开覆盖缺口。
+每条候选必须有标题、原始链接和时区明确的发布时间。报告里把已验证更新、已验证暂无更新、未能验证区分开。只有部分来源失败时继续并披露覆盖缺口。关注源非空且全部无法验证时停止。
 
 ### 3. Build The Candidate Pool
 
@@ -81,9 +75,7 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 
 ### 4. Read And Verify The Content
 
-尽量获取标题、链接、发布时间和正文、摘要、描述或文字稿。区分来源事实、来源观点和综合理解。
-
-如果只能取得标题与简介，可以进行有限判断，但必须明确资料限制。每个进入日报的信息项都要保留可点击的来源链接。
+先核对发布时间和原始链接，再按条目补充正文或证据。视频源的订阅结果只用于发现条目。仅有标题时记录更新事实。简介或章节支持范围判断。对论点作判断时，应有可定位的正文、字幕或文字稿。每条入选内容记录证据等级，区分来源事实、观点和日报判断。
 
 ### 5. Synthesize The Briefing
 
@@ -93,16 +85,9 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 
 ### 6. Deliver Or Write Back
 
-默认完成 Notion 写回：
-
-- 普通调用和自动日报：先读取目标日报数据库实时 schema，并以日期和规范化标题检查重复；优先更新同一天已有日报，否则创建新页面。
-- 仅预览：用户明确要求不写入时，直接交付 Markdown。
-- 写前把本次应落库的原文链接和来源名列成核对清单。在草稿中用真实 URL 创建可点击的 Markdown 链接。保存前检查清单中的每个 URL 都有对应链接。
-- 优先用连接器的 Markdown 写入接口保留链接。写后读取该页正文，逐项核对来源名和链接目标。仅出现标题、来源名或纯文本 URL 时，把缺失链接补回并再次核对。
-- 如需批量核对，将待查的 URL 按每行一个写入临时文件，并把待核对草稿或连接器返回的完整 Markdown 保存到另一个临时文件。运行 `python3 scripts/check_source_links.py --expected <链接清单> --markdown <正文文件>`。还需使用连接器核对实际来源名、关键属性和覆盖栏目。
-- 回读被截断或链接仍缺失时，报告实际缺口。避免因结果不明而重复创建日报。
-
-默认模式下，如果没有提供日报数据库或无法确认实时 schema，停止写入并请求正确链接或权限；可以说明已经形成的草稿状态，但不能静默降级为仅预览，也不得声称已保存。
+- 先按[写前质量检查](references/source-daily-runbook.md#写前质量检查)验证来源覆盖、时间窗口、必需栏目和入选链接。预览模式在校验通过后交付 Markdown。
+- 在共享「日报」实时核验标题字段和「标签」单选项「日报」。按完整标题 `YYYY-MM-DD 信息源日报` 与 `标签 = 日报` 查重，唯一匹配时局部更新，没有匹配时按手册处理。检查同标题不同标签的历史记录后再决定是否创建。
+- 用 `check-write` 对本次动作预检。写后核对数据源、完整标题、标签、正文和入选链接。对完整回读的正文再次运行质量检查。连接、选项或回读有问题时，说明草稿或写入的实际状态。
 
 ### 7. Update The Optional Concept Library
 
@@ -145,13 +130,14 @@ description: Create a Chinese daily briefing exclusively from sources the user h
 
 ## Failure Protection
 
-以下情况停止生成和写入，并说明具体依赖：
+以下情况停止生成和写入，并说明具体依赖。
 
 - 云端 Notion 无法访问；
 - 用户的关注源数据库无法读取；
 - 无法识别必要语义字段且用户尚未确认；
-- 所有当前来源都无法验证发布时间或链接；
-- 默认运行时无法定位`信息日报`或确认其实时 schema。
+- 关注源非空且全部无法在窗口内核实是否更新。
+
+默认写回时，目标「日报」未确认、实时 Schema 无法核实或缺少单选项「日报」都会阻止写入。可以保留已生成草稿。
 
 部分来源失败不阻塞整份日报，但必须列出未能验证的来源，并在核心判断中说明覆盖是否完整。
 

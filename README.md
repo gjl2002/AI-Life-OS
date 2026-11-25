@@ -1,6 +1,6 @@
 # AI Life OS Skill 套件
 
-版本 `3.2.0`
+版本 `3.3.0`
 
 AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 28 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
 
@@ -19,7 +19,7 @@ AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手�
 3. `question-clarification-coach`：问题澄清教练。
 4. `question-synthesis-coach`：问题综合教练。
 5. `stuck-point-insight-coach`：卡点洞察教练。
-6. `information-source-daily-briefing`：信息源日报。
+6. `information-source-daily-briefing`：核验关注源更新，写入你自己的共享「日报」，使用 `标签 = 日报`。
 7. `sop-builder`：SOP 构建。
 
 ## 生活系统

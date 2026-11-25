@@ -1,8 +1,8 @@
 # AI Life OS Skill 套件
 
-版本 `3.3.0`
+版本 `3.4.0`
 
-AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 28 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
+AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手。套件包含 31 个 Skill，覆盖方向梳理、目标规划、知识收集、任务和生活记录。需要访问 Notion 的 Skill 共用 `ai-life-system-init`，初始化一次即可。
 
 ## 初始化
 
@@ -14,13 +14,16 @@ AI Life OS Skills 帮你把个人成长和日常生活接入自己的 AI 助手�
 
 ## 成长系统
 
-1. `life-positioning-coach`：人生定位教练。
-2. `goal-planner`：目标教练。
-3. `question-clarification-coach`：问题澄清教练。
-4. `question-synthesis-coach`：问题综合教练。
-5. `stuck-point-insight-coach`：卡点洞察教练。
-6. `information-source-daily-briefing`：核验关注源更新，写入你自己的共享「日报」，使用 `标签 = 日报`。
-7. `sop-builder`：SOP 构建。
+1. `life-positioning-coach`：人生定位教练，梳理身份、优势和长期方向。
+2. `life-design-coach`：人生设计教练，构想 A/B/C 方案并用小实验证实或修订假设。
+3. `goal-planner`：目标教练。
+4. `12-week-work-coach`：12周工作教练，带你制定周期计划、安排周行动、计分和复盘。
+5. `daily-morning-briefing`：每日晨报，综合当天任务、本周计划和学习进度。授权保存时使用共享「日报」的 `标签 = 晨报`。
+6. `question-clarification-coach`：问题澄清教练。
+7. `question-synthesis-coach`：问题综合教练。
+8. `stuck-point-insight-coach`：卡点洞察教练。
+9. `information-source-daily-briefing`：核验关注源更新，写入你自己的共享「日报」，使用 `标签 = 日报`。
+10. `sop-builder`：SOP 构建。
 
 ## 生活系统
 

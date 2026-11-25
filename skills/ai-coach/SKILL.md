@@ -38,9 +38,11 @@ AI 教练本身负责识别意图和选择入口，不替代专长 Skill 的执�
 | 用户当前需要 | 优先匹配 |
 | --- | --- |
 | 把模糊、混杂的问题说清楚 | `question-clarification-coach` |
-| 梳理长期方向、人生定位或愿景 | `life-positioning-coach` |
+| 梳理身份、优势、工作观、生活观或长期愿景 | `life-positioning-coach` |
+| 为一个具体人生或职业卡点构想 A/B/C 方案，设计原型体验或做阶段性选择 | `life-design-coach` |
 | 理解当下的回避、内耗、自我怀疑或重复卡点 | `stuck-point-insight-coach` |
 | 规划或修正未来约三个月的目标 | `goal-planner` |
+| 明确采用 12 周工作法，制定周期计划、诊断周执行分数或复盘周期 | `12-week-work-coach` |
 | 围绕一个明确问题整合已有资料 | `question-synthesis-coach` |
 | 为已明确的重复工作整理 SOP | `sop-builder` |
 
@@ -50,6 +52,7 @@ AI 教练本身负责识别意图和选择入口，不替代专长 Skill 的执�
 
 | 用户当前需要 | 优先匹配 | 调用边界 |
 | --- | --- | --- |
+| 汇总今日任务、本周计划、周期和学习进度 | `daily-morning-briefing` | 普通对话交付预览。已配置的定时写入或当前请求明确授权后才保存。 |
 | 留存重要经历、转折或觉察 | `life-moment-tracker` | 用户希望记录人生时刻时调用；只按其提供的信息整理。 |
 | 记录当下情绪或情绪事件 | `emotion-tracker` | 用户提出记录时调用；若用户想理解反复卡点，优先用 `stuck-point-insight-coach`，不把记录 Skill 当心理分析。 |
 | 记录任务、待办或提醒 | `task-tracker` | 用户要求新增、整理任务或设置提醒时调用；目标规划本身优先用 `goal-planner`。 |

@@ -1,0 +1,4 @@
+interface:
+  display_name: "12周工作教练"
+  short_description: "把12周目标拆成周行动，用执行计分和周期复盘持续调整"
+  default_prompt: "请用 $12-week-work-coach 帮我回看上周，定下本周最重要的一项行动。"
